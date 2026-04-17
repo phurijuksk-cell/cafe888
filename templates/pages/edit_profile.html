@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe888 - แก้ไขข้อมูล</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-r from-[#dff5ff] via-[#f0e6ff] to-[#ffb6c1] min-h-screen font-sans text-gray-800 pb-10 relative">
+
+    <header class="p-6 flex items-center mb-4 max-w-2xl mx-auto">
+        <a href="{% url 'index' %}" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-xl shadow-md hover:bg-gray-100 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h1 class="text-3xl font-serif font-bold text-black ml-4">แก้ไขข้อมูลโปรไฟล์</h1>
+    </header>
+
+    <main class="max-w-2xl mx-auto bg-white rounded-[3rem] shadow-xl p-8 md:p-10 border-2 border-white">
+        
+        <form action="{% url 'edit_profile' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="flex flex-col items-center mb-8">
+                <div class="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-5xl mb-4 relative border-4 border-white shadow-md overflow-hidden">
+                    {% if request.user.profile.profile_pic %}
+                        <img id="previewImg" src="{{ request.user.profile.profile_pic.url }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <img id="previewImg" src="" class="w-full h-full object-cover hidden">
+                        <i class="fa-solid fa-user" id="defaultIcon"></i>
+                    {% endif %}
+                    
+                    <label class="absolute bottom-0 right-0 w-10 h-10 bg-pink-400 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-pink-500 transition shadow z-10">
+                        <i class="fa-solid fa-camera"></i>
+                        <input type="file" name="profile_pic" class="hidden" accept="image/*" onchange="previewFile(this)">
+                    </label>
+                </div>
+                <p class="text-sm text-gray-500">แตะที่ไอคอนกล้องเพื่อเปลี่ยนรูปภาพ</p>
+            </div>
+
+            <div class="space-y-5 mb-8">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2 ml-2">ชื่อผู้ใช้ (Username)</label>
+                    <input type="text" name="username" value="{{ request.user.username }}" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-5 py-3 focus:outline-none focus:border-sky-300">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2 ml-2">อีเมล (Email)</label>
+                    <input type="email" name="email" value="{{ request.user.email }}" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-5 py-3 focus:outline-none focus:border-sky-300">
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <label class="block text-gray-700 font-bold mb-3 ml-2">วิธีชำระเงินเริ่มต้น</label>
+                <select name="default_payment" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-5 py-3 focus:outline-none focus:border-sky-300 appearance-none">
+                    <option value="promptpay">สแกนจ่าย (QR Code)</option>
+                    <option value="cash">เงินสด</option>
+                    <option value="wallet">Cafe Wallet</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-[#bde0fe] hover:bg-sky-300 text-black font-bold py-4 rounded-[2rem] text-xl transition">
+                บันทึกการเปลี่ยนแปลง
+            </button>
+        </form>
+
+        <hr class="my-10 border-gray-200">
+
+        <div class="bg-red-50 p-6 md:p-8 rounded-[2rem] border-2 border-red-100">
+            <h3 class="text-xl font-bold text-red-600 mb-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> เขตอันตราย (Danger Zone)
+            </h3>
+            <p class="text-sm text-red-500 mb-6">
+                หากคุณลบบัญชี ข้อมูลและประวัติการสั่งซื้อทั้งหมดของคุณจะถูกลบอย่างถาวรและไม่สามารถกู้คืนได้
+            </p>
+            
+            <button type="button" onclick="openDeleteModal()" class="w-full bg-red-100 hover:bg-red-200 text-red-600 font-bold py-4 rounded-[2rem] text-lg transition">
+                ลบบัญชีผู้ใช้อย่างถาวร
+            </button>
+        </div>
+
+    </main>
+
+    <div id="deleteModalOverlay" onclick="closeDeleteModal()" class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"></div>
+    
+    <div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl relative z-10 border border-gray-100 text-center transform scale-100 transition-transform">
+            
+            <div class="w-20 h-20 bg-red-100 rounded-full mx-auto flex items-center justify-center text-4xl mb-4 text-red-500 shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            
+            <h2 class="text-2xl font-bold font-serif mb-2">คุณแน่ใจหรือไม่?</h2>
+            <p class="text-gray-500 mb-8 text-sm px-2">หากลบแล้วข้อมูลทั้งหมดของคุณจะหายไปอย่างถาวรและไม่สามารถกู้คืนได้</p>
+
+            <form action="{% url 'delete_account' %}" method="POST" class="w-full mb-3">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-[2rem] text-lg transition shadow-md">
+                    ใช่, ลบบัญชีเลย
+                </button>
+            </form>
+            
+            <button onclick="closeDeleteModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-4 rounded-[2rem] text-lg transition">
+                ยกเลิก
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function openDeleteModal() {
+            document.getElementById('deleteModalOverlay').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModalOverlay').classList.add('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        // ฟังก์ชันให้รูปพรีวิวโชว์ทันทีตอนเลือกไฟล์
+        function previewFile(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var preview = document.getElementById('previewImg');
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    
+                    var icon = document.getElementById('defaultIcon');
+                    if(icon) icon.classList.add('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>
