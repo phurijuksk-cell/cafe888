@@ -9,7 +9,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+       
+        html { font-size: 14px; }
+        @media (min-width: 1500px) { html { font-size: 16px; } }
 
+       
         .bg-wavy-gradient {
             background: linear-gradient(-45deg, #dff5ff, #f0e6ff, #ffb6c1, #f0e6ff);
             background-size: 400% 400%;
@@ -25,13 +29,13 @@
 <body class="bg-wavy-gradient min-h-screen font-sans text-gray-800 pb-10">
 
     <header class="p-6 flex items-center mb-4">
-        <a href="{% url 'index' %}" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-xl shadow-md hover:bg-gray-100 transition">
+        <a href="{% url 'index' %}" class="w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-xl shadow-sm hover:bg-white hover:scale-110 transition-all duration-300 text-gray-700 hover:text-black">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
-        <h1 class="text-3xl font-serif font-bold text-black ml-4">ชำระเงิน</h1>
+        <h1 class="text-3xl font-serif font-bold text-black ml-4 tracking-tight">ชำระเงิน</h1>
     </header>
 
-    <main class="max-w-3xl mx-auto bg-white rounded-[3rem] shadow-xl p-8 md:p-12 border-2 border-white">
+    <main class="max-w-3xl mx-auto bg-white/95 backdrop-blur-md rounded-[3rem] shadow-2xl p-8 md:p-12 border border-white/50 transform transition-all duration-500 hover:shadow-pink-200/50">
         
         <form action="{% url 'queue' %}" method="POST" onsubmit="return prepareCartData()">
             {% csrf_token %}
@@ -40,51 +44,51 @@
             <input type="hidden" name="discount_used" id="discountUsedInput" value="none">
             
             <section class="mb-10">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <i class="fa-solid fa-receipt text-pink-400"></i> สรุปรายการสั่งซื้อ
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-800">
+                    <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-500"><i class="fa-solid fa-receipt"></i></div> สรุปรายการสั่งซื้อ
                 </h2>
-                <div class="bg-gray-50 rounded-3xl p-6 border border-gray-100">
+                <div class="bg-gray-50 rounded-3xl p-6 border border-gray-100 shadow-inner">
                     <div id="checkoutItems" class="mb-4"></div>
-                    <hr class="my-4 border-gray-300">
+                    <div class="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-6"></div>
                     <div class="flex justify-between text-lg text-gray-600 mb-2">
                         <span>ยอดรวม</span>
-                        <span id="subtotalEl">0 บาท</span>
+                        <span id="subtotalEl" class="font-bold">0 บาท</span>
                     </div>
                     <div id="discountRow" class="flex justify-between text-lg text-red-500 font-bold mb-2 hidden">
                         <span>ส่วนลด</span>
                         <span id="discountEl">-0 บาท</span>
                     </div>
-                    <div class="flex justify-between text-2xl font-black text-black mt-4">
+                    <div class="flex justify-between text-3xl font-black text-black mt-6">
                         <span>ยอดสุทธิ</span>
-                        <span id="checkoutTotal" class="text-pink-500">0 บาท</span>
+                        <span id="checkoutTotal" class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">0 บาท</span>
                     </div>
                 </div>
             </section>
 
             {% if request.user.is_authenticated %}
             <section class="mb-10">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <i class="fa-solid fa-star text-yellow-400"></i> สิทธิพิเศษ (คุณมี {{ request.user.profile.points }} แต้ม)
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-800">
+                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500"><i class="fa-solid fa-star"></i></div> สิทธิพิเศษ <span class="text-sm font-medium text-gray-500 ml-2">(คุณมี {{ request.user.profile.points }} แต้ม)</span>
                 </h2>
-                <div class="grid grid-cols-1 gap-3">
-                    <label class="cursor-pointer relative">
+                <div class="grid grid-cols-1 gap-4">
+                    <label class="cursor-pointer relative group">
                         <input type="radio" name="discount_select" value="none" class="peer sr-only" checked onchange="loadCheckoutItems()">
-                        <div class="rounded-2xl border-2 border-gray-200 p-4 hover:bg-gray-50 peer-checked:border-sky-400 peer-checked:bg-sky-50 font-bold transition">
+                        <div class="rounded-2xl border-2 border-gray-200 p-5 bg-white hover:border-gray-300 peer-checked:border-sky-400 peer-checked:bg-sky-50 font-bold transition-all duration-300 shadow-sm hover:shadow-md group-hover:-translate-y-1">
                             ไม่ใช้สิทธิ์
                         </div>
                     </label>
-                    <label class="cursor-pointer relative {% if request.user.profile.points < 100 %}opacity-50{% endif %}">
+                    <label class="cursor-pointer relative group {% if request.user.profile.points < 100 %}opacity-50 grayscale{% endif %}">
                         <input type="radio" name="discount_select" value="20_percent" class="peer sr-only" onchange="loadCheckoutItems()" {% if request.user.profile.points < 100 %}disabled{% endif %}>
-                        <div class="rounded-2xl border-2 border-gray-200 p-4 hover:bg-gray-50 peer-checked:border-yellow-400 peer-checked:bg-yellow-50 font-bold flex justify-between transition">
-                            <span>ลด 20% ทั้งบิล</span>
-                            <span class="text-yellow-600 text-sm"><i class="fa-solid fa-tag"></i> -100 แต้ม</span>
+                        <div class="rounded-2xl border-2 border-gray-200 p-5 bg-white hover:border-yellow-300 peer-checked:border-yellow-400 peer-checked:bg-yellow-50 font-bold flex justify-between transition-all duration-300 shadow-sm hover:shadow-md group-hover:-translate-y-1">
+                            <span class="peer-checked:text-yellow-700">ลด 20% ทั้งบิล</span>
+                            <span class="text-yellow-600 text-sm bg-yellow-100 px-3 py-1 rounded-full"><i class="fa-solid fa-tag"></i> -100 แต้ม</span>
                         </div>
                     </label>
-                    <label class="cursor-pointer relative {% if request.user.profile.points < 150 %}opacity-50{% endif %}">
+                    <label class="cursor-pointer relative group {% if request.user.profile.points < 150 %}opacity-50 grayscale{% endif %}">
                         <input type="radio" name="discount_select" value="free_drink" class="peer sr-only" onchange="loadCheckoutItems()" {% if request.user.profile.points < 150 %}disabled{% endif %}>
-                        <div class="rounded-2xl border-2 border-gray-200 p-4 hover:bg-gray-50 peer-checked:border-yellow-400 peer-checked:bg-yellow-50 font-bold flex justify-between transition">
-                            <span>รับฟรี 1 แก้ว (หักแก้วที่แพงสุด)</span>
-                            <span class="text-yellow-600 text-sm"><i class="fa-solid fa-tag"></i> -150 แต้ม</span>
+                        <div class="rounded-2xl border-2 border-gray-200 p-5 bg-white hover:border-yellow-300 peer-checked:border-yellow-400 peer-checked:bg-yellow-50 font-bold flex justify-between transition-all duration-300 shadow-sm hover:shadow-md group-hover:-translate-y-1">
+                            <span class="peer-checked:text-yellow-700">รับฟรี 1 แก้ว (หักแก้วที่แพงสุด)</span>
+                            <span class="text-yellow-600 text-sm bg-yellow-100 px-3 py-1 rounded-full"><i class="fa-solid fa-tag"></i> -150 แต้ม</span>
                         </div>
                     </label>
                 </div>
@@ -92,62 +96,62 @@
             {% endif %}
 
             <section class="mb-10">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <i class="fa-solid fa-utensils text-orange-400"></i> รูปแบบการรับประทาน
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-800">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500"><i class="fa-solid fa-utensils"></i></div> รูปแบบการรับประทาน
                 </h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <label class="cursor-pointer relative">
+                <div class="grid grid-cols-2 gap-5">
+                    <label class="cursor-pointer relative group">
                         <input type="radio" name="dining_option" value="dine_in" class="peer sr-only" checked onchange="toggleTable()">
-                        <div class="rounded-3xl border-2 border-gray-200 p-4 text-center hover:bg-gray-50 transition peer-checked:border-sky-400 peer-checked:bg-sky-50">
-                            <i class="fa-solid fa-store text-3xl mb-2 text-sky-600"></i>
-                            <h3 class="font-bold text-lg">ทานที่ร้าน</h3>
+                        <div class="rounded-3xl border-2 border-gray-200 p-6 bg-white text-center hover:border-sky-300 transition-all duration-300 peer-checked:border-sky-400 peer-checked:bg-sky-50 shadow-sm hover:shadow-md group-hover:-translate-y-1">
+                            <i class="fa-solid fa-store text-4xl mb-3 text-sky-600 group-hover:scale-110 transition-transform"></i>
+                            <h3 class="font-bold text-lg peer-checked:text-sky-700">ทานที่ร้าน</h3>
                         </div>
                     </label>
-                    <label class="cursor-pointer relative">
+                    <label class="cursor-pointer relative group">
                         <input type="radio" name="dining_option" value="takeaway" class="peer sr-only" onchange="toggleTable()">
-                        <div class="rounded-3xl border-2 border-gray-200 p-4 text-center hover:bg-gray-50 transition peer-checked:border-pink-400 peer-checked:bg-pink-50">
-                            <i class="fa-solid fa-bag-shopping text-3xl mb-2 text-pink-600"></i>
-                            <h3 class="font-bold text-lg">กลับบ้าน</h3>
+                        <div class="rounded-3xl border-2 border-gray-200 p-6 bg-white text-center hover:border-pink-300 transition-all duration-300 peer-checked:border-pink-400 peer-checked:bg-pink-50 shadow-sm hover:shadow-md group-hover:-translate-y-1">
+                            <i class="fa-solid fa-bag-shopping text-4xl mb-3 text-pink-600 group-hover:scale-110 transition-transform"></i>
+                            <h3 class="font-bold text-lg peer-checked:text-pink-700">กลับบ้าน</h3>
                         </div>
                     </label>
                 </div>
             </section>
 
-            <section id="tableSection" class="mb-10 transition-all duration-300">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <i class="fa-solid fa-chair text-sky-400"></i> ระบุโต๊ะของคุณ
+            <section id="tableSection" class="mb-10 transition-all duration-500 overflow-hidden origin-top">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-800">
+                    <div class="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-500"><i class="fa-solid fa-chair"></i></div> ระบุโต๊ะของคุณ
                 </h2>
                 <div class="flex gap-4">
                     <input type="text" id="tableInput" name="table_number" placeholder="เช่น โต๊ะ 5 หรือ A12" required
-                        class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-sky-300 transition">
+                        class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-5 text-lg focus:outline-none focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-50 transition-all duration-300 shadow-inner">
                 </div>
             </section>
 
             <section class="mb-10">
-                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <i class="fa-solid fa-wallet text-purple-400"></i> ช่องทางการชำระเงิน
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-800">
+                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-500"><i class="fa-solid fa-wallet"></i></div> ช่องทางการชำระเงิน
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label class="cursor-pointer relative">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <label class="cursor-pointer relative group">
                         <input type="radio" name="payment_method" value="promptpay" class="peer sr-only" checked onchange="togglePaymentMethod()">
-                        <div class="rounded-3xl border-2 border-gray-200 p-6 hover:bg-gray-50 transition peer-checked:border-sky-400 peer-checked:bg-sky-50">
+                        <div class="rounded-3xl border-2 border-gray-200 p-6 bg-white hover:border-sky-300 transition-all duration-300 peer-checked:border-sky-400 peer-checked:bg-sky-50 shadow-sm hover:shadow-md group-hover:-translate-y-1">
                             <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-sky-200 text-sky-700 rounded-full flex items-center justify-center text-2xl"><i class="fa-solid fa-qrcode"></i></div>
+                                <div class="w-14 h-14 bg-gradient-to-br from-sky-200 to-blue-200 text-sky-700 rounded-full flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform"><i class="fa-solid fa-qrcode"></i></div>
                                 <div>
-                                    <h3 class="font-bold text-lg">สแกนจ่าย (QR Code)</h3>
-                                    <p class="text-sm text-gray-500">พร้อมเพย์ / Mobile Banking</p>
+                                    <h3 class="font-bold text-lg peer-checked:text-sky-700">สแกนจ่าย</h3>
+                                    <p class="text-sm text-gray-500">QR Code / พร้อมเพย์</p>
                                 </div>
                             </div>
                         </div>
                     </label>
-                    <label class="cursor-pointer relative">
+                    <label class="cursor-pointer relative group">
                         <input type="radio" name="payment_method" value="cash" class="peer sr-only" onchange="togglePaymentMethod()">
-                        <div class="rounded-3xl border-2 border-gray-200 p-6 hover:bg-gray-50 transition peer-checked:border-pink-400 peer-checked:bg-pink-50">
+                        <div class="rounded-3xl border-2 border-gray-200 p-6 bg-white hover:border-pink-300 transition-all duration-300 peer-checked:border-pink-400 peer-checked:bg-pink-50 shadow-sm hover:shadow-md group-hover:-translate-y-1">
                             <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-pink-200 text-pink-700 rounded-full flex items-center justify-center text-2xl"><i class="fa-solid fa-money-bill-wave"></i></div>
+                                <div class="w-14 h-14 bg-gradient-to-br from-pink-200 to-rose-200 text-pink-700 rounded-full flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform"><i class="fa-solid fa-money-bill-wave"></i></div>
                                 <div>
-                                    <h3 class="font-bold text-lg">เงินสด</h3>
-                                    <p class="text-sm text-gray-500">ชำระที่เคาน์เตอร์</p>
+                                    <h3 class="font-bold text-lg peer-checked:text-pink-700">เงินสด</h3>
+                                    <p class="text-sm text-gray-500">ชำระที่หน้าเคาน์เตอร์</p>
                                 </div>
                             </div>
                         </div>
@@ -155,16 +159,18 @@
                 </div>
             </section>
 
-            <section id="qrCodeSection" class="mb-10 text-center transition-all duration-300">
-                <div class="bg-gray-50 p-6 rounded-3xl border-2 border-sky-200 inline-block shadow-sm">
-                    <h3 class="text-sky-600 font-bold mb-4 text-lg"><i class="fa-solid fa-mobile-screen mr-2"></i> สแกน QR Code เพื่อชำระเงิน</h3>
-                    <img src="{% static 'images/qr888.jpg' %}" alt="QR Code" class="w-56 h-56 mx-auto rounded-xl shadow-inner border-4 border-white object-cover">
-                    <p class="text-red-500 text-sm mt-4 font-bold">ห้ามใช้แอพธนาคารแสกนนะจ๊ะ</p>
+            <section id="qrCodeSection" class="mb-10 text-center transition-all duration-500 overflow-hidden origin-top">
+                <div class="bg-gradient-to-b from-sky-50 to-white p-8 rounded-[2.5rem] border-2 border-sky-100 inline-block shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <h3 class="text-sky-600 font-bold mb-6 text-xl"><i class="fa-solid fa-mobile-screen mr-2 animate-pulse"></i> สแกน QR Code เพื่อชำระเงิน</h3>
+                    <div class="relative p-3 bg-white rounded-3xl shadow-md border border-gray-100 inline-block group">
+                        <img src="{% static 'images/qr888.jpg' %}" alt="QR Code" class="w-64 h-64 mx-auto rounded-2xl object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <p class="text-red-500 text-sm mt-6 font-bold bg-red-50 py-2 px-4 rounded-full block mx-auto border border-red-100"><i class="fa-solid fa-circle-exclamation mr-1"></i> ห้ามใช้แอพธนาคารแสกนนะจ๊ะ</p>
                 </div>
             </section>
 
-            <button type="submit" class="w-full bg-[#bde0fe] hover:bg-sky-300 text-black font-bold py-5 rounded-[2rem] text-2xl shadow-lg transition transform hover:-translate-y-1">
-                ยืนยันการสั่งซื้อ
+            <button type="submit" class="w-full bg-gradient-to-r from-sky-300 to-[#bde0fe] hover:from-sky-400 hover:to-sky-300 text-black font-black py-5 rounded-[2rem] text-2xl shadow-xl transition-all duration-300 transform hover:-translate-y-2 hover:shadow-sky-300/50 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-check-circle"></i> ยืนยันการสั่งซื้อ
             </button>
         </form>
     </main>
@@ -176,10 +182,14 @@
             const tableInput = document.getElementById('tableInput');
 
             if (dineInChecked) {
-                tableSection.style.display = 'block';
+                tableSection.style.maxHeight = '200px';
+                tableSection.style.opacity = '1';
+                tableSection.style.marginTop = '0';
                 tableInput.required = true;
             } else {
-                tableSection.style.display = 'none';
+                tableSection.style.maxHeight = '0';
+                tableSection.style.opacity = '0';
+                tableSection.style.marginTop = '-2rem';
                 tableInput.required = false;
                 tableInput.value = '';
             }
@@ -190,9 +200,15 @@
             const qrSection = document.getElementById('qrCodeSection');
 
             if (promptpayChecked) {
-                qrSection.style.display = 'block';
+                qrSection.style.maxHeight = '600px';
+                qrSection.style.opacity = '1';
+                qrSection.style.transform = 'scale(1)';
+                qrSection.style.marginTop = '0';
             } else {
-                qrSection.style.display = 'none';
+                qrSection.style.maxHeight = '0';
+                qrSection.style.opacity = '0';
+                qrSection.style.transform = 'scale(0.95)';
+                qrSection.style.marginTop = '-2rem';
             }
         }
 
@@ -205,9 +221,9 @@
             container.innerHTML = '';
 
             if (cart.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-400">ไม่พบสินค้าในตะกร้า โปรดกลับไปเลือกสินค้าที่หน้าแรก</div>';
+                container.innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fa-solid fa-basket-shopping text-4xl mb-3 text-gray-200"></i><br>ไม่พบสินค้าในตะกร้า โปรดกลับไปเลือกสินค้าที่หน้าแรก</div>';
                 document.querySelector('button[type="submit"]').disabled = true;
-                document.querySelector('button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed');
+                document.querySelector('button[type="submit"]').classList.add('opacity-50', 'cursor-not-allowed', 'grayscale');
             } else {
                 cart.forEach(item => {
                     const itemTotal = item.price * item.qty;
@@ -225,16 +241,16 @@
                     if (item.meat) details.push(`เนื้อ${item.meat}`);
 
                     if(details.length > 0) {
-                        optionText = `<div class="text-sm text-sky-600 font-bold mt-1 inline-block">(${details.join(' / ')})</div>`;
+                        optionText = `<div class="text-xs text-sky-600 font-bold mt-1 bg-sky-50 px-2 py-1 rounded-md inline-block border border-sky-100">(${details.join(' / ')})</div>`;
                     }
                     
                     container.innerHTML += `
-                        <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+                        <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4 hover:bg-white hover:shadow-sm p-3 rounded-xl transition-all duration-300">
                             <div>
-                                <span class="font-bold text-lg">${item.name} <span class="text-sky-500">(x${item.qty})</span></span>
-                                ${optionText}
+                                <span class="font-bold text-lg text-gray-800">${item.name} <span class="text-sky-500 bg-sky-50 px-2 py-0.5 rounded-md text-sm ml-1">x${item.qty}</span></span>
+                                <br>${optionText}
                             </div>
-                            <span class="font-bold text-lg">${itemTotal} บาท</span>
+                            <span class="font-black text-lg text-gray-700">${itemTotal}.-</span>
                         </div>
                     `;
                 });
@@ -273,7 +289,7 @@
         function prepareCartData() {
             const cart = localStorage.getItem('cafe888_cart') || '[]';
             document.getElementById('cartDataInput').value = cart;
-          
+            localStorage.removeItem('cafe888_cart');
             return true;
         }
 

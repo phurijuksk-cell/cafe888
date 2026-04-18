@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         
+        html { font-size: 14px; }
+        @media (min-width: 1500px) { html { font-size: 16px; } }
+
+    
         .bg-wavy-gradient {
             background: linear-gradient(-45deg, #dff5ff, #f0e6ff, #ffb6c1, #f0e6ff);
             background-size: 400% 400%;
@@ -24,18 +28,18 @@
 </head>
 <body class="bg-wavy-gradient min-h-screen font-sans text-gray-800 flex flex-col items-center justify-center p-6">
 
-    <div class="w-full max-w-md bg-white rounded-[3rem] p-8 md:p-10 shadow-2xl relative border-2 border-white">
+    <div class="w-full max-w-md bg-white/95 backdrop-blur-md rounded-[3rem] p-8 md:p-10 shadow-2xl relative border border-white/50 transform hover:shadow-pink-200/50 transition-shadow duration-500">
         
-        <a href="{% url 'staff_dashboard' %}" class="absolute top-6 left-6 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-xl shadow-sm hover:bg-gray-200 transition text-gray-600">
+        <a href="{% url 'staff_dashboard' %}" class="absolute top-6 left-6 w-12 h-12 bg-gray-50 border border-gray-200 rounded-full flex items-center justify-center text-xl shadow-sm hover:bg-white hover:scale-110 transition-all duration-300 text-gray-600 hover:text-black">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
         
         <div class="text-center mb-8 mt-4">
-            <div class="w-20 h-20 bg-pink-100 text-pink-500 rounded-full mx-auto flex items-center justify-center text-3xl mb-4 shadow-inner border-4 border-white">
+            <div class="w-24 h-24 bg-gradient-to-br from-pink-100 to-rose-100 text-pink-500 rounded-full mx-auto flex items-center justify-center text-4xl mb-5 shadow-inner border-4 border-white hover:scale-105 transition-transform duration-300">
                 <i class="fa-solid fa-user-shield"></i>
             </div>
-            <h1 class="text-3xl font-bold font-serif text-black">เพิ่มพนักงานใหม่</h1>
-            <p class="text-gray-500 mt-2 text-sm font-medium">เฉพาะเจ้าของร้านเท่านั้นที่จัดการส่วนนี้ได้</p>
+            <h1 class="text-3xl font-bold font-serif text-black tracking-tight">เพิ่มพนักงานใหม่</h1>
+            <p class="text-gray-500 mt-2 text-sm font-medium bg-gray-50 inline-block px-4 py-1 rounded-full border border-gray-100">เฉพาะเจ้าของร้านเท่านั้นที่จัดการส่วนนี้ได้</p>
         </div>
 
         <form action="{% url 'add_staff' %}" method="POST">
@@ -43,14 +47,14 @@
             
             <div class="mb-5">
                 <label class="block text-gray-700 font-bold mb-2 ml-2 text-sm"><i class="fa-solid fa-user mr-1 text-sky-400"></i> ชื่อผู้ใช้ (Username)</label>
-                <input type="text" name="username" placeholder="ตั้งชื่อให้พนักงาน" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-sky-300 transition" required>
+                <input type="text" name="username" placeholder="ตั้งชื่อให้พนักงาน" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 text-lg font-medium focus:outline-none focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-50 transition-all duration-300" required>
             </div>
             
             <div class="mb-8">
                 <label class="block text-gray-700 font-bold mb-2 ml-2 text-sm"><i class="fa-solid fa-lock mr-1 text-pink-400"></i> รหัสผ่าน (Password)</label>
                 <div class="relative">
-                    <input type="password" id="staffPassword" name="password" placeholder="อย่างน้อย 6 ตัวอักษร" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 pr-14 text-lg focus:outline-none focus:border-pink-300 transition" required>
-                    <button type="button" onclick="togglePassword('staffPassword', this)" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-pink-500 transition text-xl">
+                    <input type="password" id="staffPassword" name="password" placeholder="อย่างน้อย 6 ตัวอักษร" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 pr-14 text-lg font-medium focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-50 transition-all duration-300" required>
+                    <button type="button" onclick="togglePassword('staffPassword', this)" class="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-pink-500 transition text-xl">
                         <i class="fa-solid fa-eye"></i>
                     </button>
                 </div>
@@ -58,14 +62,14 @@
             
             {% for message in messages %}
                 {% if 'add_staff_success' in message.tags %}
-                    <div class="bg-green-100 text-green-700 px-4 py-3 rounded-2xl mb-6 text-center font-bold text-sm border border-green-200 shadow-sm animate-bounce"><i class="fa-solid fa-circle-check"></i> {{ message }}</div>
+                    <div class="bg-green-50 text-green-600 px-4 py-3 rounded-2xl mb-6 text-center font-bold text-sm border border-green-200 shadow-sm animate-bounce"><i class="fa-solid fa-circle-check"></i> {{ message }}</div>
                 {% elif 'add_staff_error' in message.tags %}
-                    <div class="bg-red-100 text-red-600 px-4 py-3 rounded-2xl mb-6 text-center font-bold text-sm border border-red-200 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> {{ message }}</div>
+                    <div class="bg-red-50 text-red-500 px-4 py-3 rounded-2xl mb-6 text-center font-bold text-sm border border-red-200 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> {{ message }}</div>
                 {% endif %}
             {% endfor %}
 
-            <button type="submit" class="w-full bg-pink-300 hover:bg-pink-400 text-pink-900 font-bold py-5 rounded-[2rem] text-xl shadow-md transition transform hover:-translate-y-1">
-                <i class="fa-solid fa-check mr-2"></i> สร้างบัญชีพนักงาน
+            <button type="submit" class="w-full bg-gradient-to-r from-pink-300 to-[#ffb6c1] hover:from-pink-400 hover:to-pink-300 text-black font-black py-5 rounded-[2rem] text-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex justify-center items-center gap-2 hover:shadow-pink-300/50">
+                <i class="fa-solid fa-user-plus"></i> สร้างบัญชีพนักงาน
             </button>
         </form>
     </div>
