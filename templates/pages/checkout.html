@@ -5,10 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cafe888 - ชำระเงิน</title>
+    <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}?v=2">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+
+        .bg-wavy-gradient {
+            background: linear-gradient(-45deg, #dff5ff, #f0e6ff, #ffb6c1, #f0e6ff);
+            background-size: 400% 400%;
+            animation: gradientWave 8s ease infinite;
+        }
+        @keyframes gradientWave {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-r from-[#dff5ff] via-[#f0e6ff] to-[#ffb6c1] min-h-screen font-sans text-gray-800 pb-10">
+<body class="bg-wavy-gradient min-h-screen font-sans text-gray-800 pb-10">
 
     <header class="p-6 flex items-center mb-4">
         <a href="{% url 'index' %}" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-xl shadow-md hover:bg-gray-100 transition">
@@ -204,8 +218,14 @@
                     }
                     
                     let optionText = '';
-                    if(item.isDrink) {
-                        optionText = `<div class="text-sm text-gray-500 mt-1">(${item.drink_type}, หวาน ${item.sweetness}%, ${item.size})</div>`;
+                    let details = [];
+                    if (item.isDrink) details.push(`${item.drink_type}, หวาน ${item.sweetness}%, ${item.size}`);
+                    if (item.boba && item.boba !== 'ไม่ใส่') details.push('+ไข่มุก');
+                    if (item.flavor) details.push(`รส${item.flavor}`);
+                    if (item.meat) details.push(`เนื้อ${item.meat}`);
+
+                    if(details.length > 0) {
+                        optionText = `<div class="text-sm text-sky-600 font-bold mt-1 inline-block">(${details.join(' / ')})</div>`;
                     }
                     
                     container.innerHTML += `
@@ -253,7 +273,7 @@
         function prepareCartData() {
             const cart = localStorage.getItem('cafe888_cart') || '[]';
             document.getElementById('cartDataInput').value = cart;
-            localStorage.removeItem('cafe888_cart');
+          
             return true;
         }
 

@@ -1,20 +1,58 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cafe888 - แก้ไขข้อมูล</title>
+    <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}?v=2">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+   
+        .bg-wavy-gradient {
+            background: linear-gradient(-45deg, #dff5ff, #f0e6ff, #ffb6c1, #f0e6ff);
+            background-size: 400% 400%;
+            animation: gradientWave 8s ease infinite;
+        }
+        @keyframes gradientWave {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-r from-[#dff5ff] via-[#f0e6ff] to-[#ffb6c1] min-h-screen font-sans text-gray-800 pb-10 relative">
+<body class="bg-wavy-gradient min-h-screen font-sans text-gray-800 pb-10 relative">
 
-    <header class="p-6 flex items-center mb-4 max-w-2xl mx-auto">
+    <header class="sticky top-0 z-[45] flex justify-between items-center py-4 px-6 bg-wavy-gradient shadow-sm mb-6">
+        <a href="{% url 'index' %}" class="flex items-center gap-3 hover:opacity-80 transition cursor-pointer">
+            <img src="{% static 'images/logo.jpg' %}" alt="Cafe888 Logo" class="w-14 h-14 rounded-full object-cover shadow-md border-2 border-white">
+            <h1 class="text-3xl font-serif font-bold text-black ml-2">Cafe888</h1>
+        </a>
+        
+        <div class="flex gap-5 items-center">
+            <div id="bellWrapper" class="text-3xl">
+                <button onclick="openModal('queueModal')" class="hover:opacity-70 transition relative mt-1 text-black block">
+                    <i class="fa-solid fa-bell"></i>
+                </button>
+            </div>
+            
+            <div class="flex items-center justify-center">
+                {% if request.user.is_authenticated and request.user.profile.profile_pic %}
+                    <img src="{{ request.user.profile.profile_pic.url }}" alt="Profile" class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm">
+                {% else %}
+                    <i class="fa-solid fa-circle-user text-[32px] text-gray-800"></i>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="p-6 flex items-center mb-4 max-w-2xl mx-auto pt-0">
         <a href="{% url 'index' %}" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-xl shadow-md hover:bg-gray-100 transition">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
         <h1 class="text-3xl font-serif font-bold text-black ml-4">แก้ไขข้อมูลโปรไฟล์</h1>
-    </header>
+    </div>
 
     <main class="max-w-2xl mx-auto bg-white rounded-[3rem] shadow-xl p-8 md:p-10 border-2 border-white">
         
@@ -80,43 +118,108 @@
 
     </main>
 
-    <div id="deleteModalOverlay" onclick="closeDeleteModal()" class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"></div>
-    
-    <div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div id="deleteModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-4">
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl relative z-10 border border-gray-100 text-center transform scale-100 transition-transform">
-            
             <div class="w-20 h-20 bg-red-100 rounded-full mx-auto flex items-center justify-center text-4xl mb-4 text-red-500 shadow-sm">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            
             <h2 class="text-2xl font-bold font-serif mb-2">คุณแน่ใจหรือไม่?</h2>
             <p class="text-gray-500 mb-8 text-sm px-2">หากลบแล้วข้อมูลทั้งหมดของคุณจะหายไปอย่างถาวรและไม่สามารถกู้คืนได้</p>
-
             <form action="{% url 'delete_account' %}" method="POST" class="w-full mb-3">
                 {% csrf_token %}
                 <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-[2rem] text-lg transition shadow-md">
                     ใช่, ลบบัญชีเลย
                 </button>
             </form>
-            
-            <button onclick="closeDeleteModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-4 rounded-[2rem] text-lg transition">
+            <button onclick="closeAllPopups()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-4 rounded-[2rem] text-lg transition">
                 ยกเลิก
             </button>
         </div>
     </div>
 
+    <div id="queueModal" onclick="if(event.target === this) closeAllPopups()" class="hidden fixed inset-0 z-[80] flex items-center justify-center px-4 backdrop-blur-sm bg-black/40">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl relative z-10 text-center">
+            <button onclick="closeAllPopups()" class="absolute top-4 right-4 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-20 h-20 bg-sky-100 text-sky-500 rounded-full mx-auto flex items-center justify-center text-4xl mb-4 shadow-sm">
+                <i class="fa-solid fa-bell-concierge"></i>
+            </div>
+            <h2 class="text-2xl font-bold font-serif mb-2 text-black">สถานะออเดอร์ของคุณ</h2>
+            <div id="queueContent" class="mt-4 mb-6">
+                <p class="text-gray-500">กำลังโหลดข้อมูล...</p>
+            </div>
+            <button onclick="closeAllPopups()" class="w-full bg-[#bde0fe] hover:bg-sky-300 text-black font-bold py-4 rounded-[2rem] text-xl transition shadow-md">
+                ตกลง / ปิดหน้าต่าง
+            </button>
+        </div>
+    </div>
+
+    <div id="overlay" onclick="closeAllPopups()" class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"></div>
+
     <script>
-        function openDeleteModal() {
-            document.getElementById('deleteModalOverlay').classList.remove('hidden');
-            document.getElementById('deleteModal').classList.remove('hidden');
+        function openModal(modalId) { 
+            document.getElementById('overlay').classList.remove('hidden'); 
+            document.getElementById(modalId).classList.remove('hidden'); 
+        }
+        
+        function openDeleteModal() { openModal('deleteModal'); }
+
+        function closeAllPopups() { 
+            if(document.getElementById('overlay')) document.getElementById('overlay').classList.add('hidden'); 
+            if(document.getElementById('deleteModal')) document.getElementById('deleteModal').classList.add('hidden'); 
+            if(document.getElementById('queueModal')) document.getElementById('queueModal').classList.add('hidden'); 
         }
 
-        function closeDeleteModal() {
-            document.getElementById('deleteModalOverlay').classList.add('hidden');
-            document.getElementById('deleteModal').classList.add('hidden');
+        function checkQueueStatus() {
+            fetch("{% url 'api_check_queue' %}")
+                .then(res => res.json())
+                .then(data => {
+                    const bellWrapper = document.getElementById('bellWrapper');
+                    const queueContent = document.getElementById('queueContent');
+                    if(!bellWrapper || !queueContent) return;
+
+                    if(data.status === 'none') {
+                        bellWrapper.innerHTML = `<button onclick="openModal('queueModal')" class="opacity-30 transition relative mt-1 text-gray-400 block"><i class="fa-solid fa-bell"></i></button>`;
+                        queueContent.innerHTML = `<p class="text-gray-500 font-medium py-4">คุณยังไม่มีคิวในขณะนี้ ไปสั่งอาหารกันเถอะ!</p>`;
+                    } else {
+                        let dotHtml = '';
+                        let statusText = '';
+                        let statusColor = '';
+
+                        if(data.status === 'ready') {
+                            dotHtml = `<span class="absolute -top-1 -right-1 flex h-4 w-4"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white"></span></span>`;
+                            statusText = 'อาหารเสร็จแล้ว! มารับได้เลย 🎉';
+                            statusColor = 'text-green-500 bg-green-50 border-green-200';
+                            
+                            if(!sessionStorage.getItem('queue_alerted_ready')) {
+                                openModal('queueModal');
+                                sessionStorage.setItem('queue_alerted_ready', 'true');
+                            }
+                        } else if (data.status === 'cooking') {
+                            statusText = 'พนักงานกำลังเตรียมอาหาร 🍳';
+                            statusColor = 'text-orange-500 bg-orange-50 border-orange-200';
+                            sessionStorage.removeItem('queue_alerted_ready');
+                        } else {
+                            statusText = 'รอคิว / รอรับออเดอร์ ⏳';
+                            statusColor = 'text-gray-600 bg-gray-50 border-gray-200';
+                            sessionStorage.removeItem('queue_alerted_ready');
+                        }
+
+                        bellWrapper.innerHTML = `<button onclick="openModal('queueModal')" class="hover:opacity-70 transition relative mt-1 text-black block"><i class="fa-solid fa-bell"></i>${dotHtml}</button>`;
+                        
+                        queueContent.innerHTML = `
+                            <div class="mb-4">
+                                <span class="text-gray-500 text-sm">หมายเลขคิวของคุณ</span>
+                                <h3 class="text-5xl font-black text-sky-500 mt-1">${data.queue_number}</h3>
+                            </div>
+                            <div class="text-lg font-bold ${statusColor} py-4 px-2 rounded-2xl border shadow-sm">${statusText}</div>
+                        `;
+                    }
+                })
+                .catch(err => console.log(err));
         }
 
-        // ฟังก์ชันให้รูปพรีวิวโชว์ทันทีตอนเลือกไฟล์
         function previewFile(input) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
@@ -124,13 +227,17 @@
                     var preview = document.getElementById('previewImg');
                     preview.src = e.target.result;
                     preview.classList.remove('hidden');
-                    
                     var icon = document.getElementById('defaultIcon');
                     if(icon) icon.classList.add('hidden');
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        window.onload = function() {
+            setInterval(checkQueueStatus, 5000);
+            checkQueueStatus();
+        };
     </script>
 </body>
 </html>

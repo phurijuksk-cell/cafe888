@@ -11,11 +11,24 @@
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .category-row > div:nth-child(n+9) { display: none !important; }
+        
+     
+        .bg-wavy-gradient {
+            background: linear-gradient(-45deg, #dff5ff, #f0e6ff, #ffb6c1, #f0e6ff);
+            background-size: 400% 400%;
+            animation: gradientWave 8s ease infinite;
+        }
+        @keyframes gradientWave {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
     </style>
 </head>
 <body class="bg-white overflow-x-hidden text-gray-800 font-sans relative">
 
-    <header class="sticky top-0 z-[45] flex justify-between items-center py-4 px-6 bg-gradient-to-r from-[#dff5ff] via-[#f0e6ff] to-[#ffb6c1] shadow-sm">
+    <header class="sticky top-0 z-[45] flex justify-between items-center py-4 px-6 bg-wavy-gradient shadow-sm">
         <div class="flex items-center gap-3">
             <img src="{% static 'images/logo.jpg' %}" alt="Cafe888 Logo" class="w-14 h-14 rounded-full object-cover shadow-md border-2 border-white">
             <h1 class="text-3xl font-serif font-bold text-black ml-2">Cafe888</h1>
@@ -24,7 +37,7 @@
         <div class="flex gap-5 items-center">
             <div id="bellWrapper" class="text-3xl">
                 {% if has_active_queue %}
-                    <a href="{% url 'queue' %}" class="hover:opacity-70 transition relative mt-1 text-black block">
+                    <button onclick="openModal('queueModal')" class="hover:opacity-70 transition relative mt-1 text-black block">
                         <i class="fa-solid fa-bell"></i>
                         {% if queue_status == 'ready' %}
                         <span class="absolute -top-1 -right-1 flex h-4 w-4">
@@ -32,9 +45,9 @@
                             <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white"></span>
                         </span>
                         {% endif %}
-                    </a>
+                    </button>
                 {% else %}
-                    <button class="opacity-30 cursor-not-allowed transition relative mt-1 text-gray-400 block" disabled title="ยังไม่มีคิวในขณะนี้">
+                    <button onclick="openModal('queueModal')" class="opacity-30 transition relative mt-1 text-gray-400 block" title="ยังไม่มีคิวในขณะนี้">
                         <i class="fa-solid fa-bell"></i>
                     </button>
                 {% endif %}
@@ -50,51 +63,43 @@
         </div>
     </header>
 
-    <div class="bg-gradient-to-r from-[#dff5ff] via-[#f0e6ff] to-[#ffb6c1] pb-8 pt-2 px-6">
-        <div class="relative flex items-center w-full mb-2 -mx-6 w-[calc(100%+3rem)] group">
-            
-            <button onclick="scrollBanner(-1)" class="absolute left-4 z-20 bg-white/80 backdrop-blur min-w-[40px] h-10 rounded-full flex items-center justify-center text-xl shadow-lg hover:bg-white transition opacity-70 hover:opacity-100 hidden md:flex">
+    <div class="bg-wavy-gradient pb-8 pt-2">
+        <div class="relative w-full group">
+            <button onclick="scrollBanner(-1)" class="absolute left-2 md:left-6 top-[45%] -translate-y-1/2 z-20 bg-white/80 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg hover:bg-white transition opacity-80 hover:opacity-100">
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
             
             <div id="bannerScroll" class="flex gap-4 w-full overflow-x-auto no-scrollbar scroll-smooth snap-x px-6 pb-4">
                 {% for item in banner_products %}
-                <div onclick="openProductModal('{{ item.id }}', '{{ item.name }}', {{ item.price }}, '{% if item.image_url %}{{ item.image_url }}{% else %}https://via.placeholder.com/300{% endif %}', '{{ item.category.name }}')" 
-                     class="min-w-[85vw] md:min-w-[500px] flex-1 h-52 lg:h-64 bg-white rounded-3xl shadow-md flex items-center justify-center text-2xl font-medium relative overflow-hidden group/item cursor-pointer snap-center border-2 border-transparent hover:border-pink-200 transition-all">
-                    {% if item.image_url %}
-                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/item:scale-105 group-hover/item:opacity-100 transition duration-500">
-                    {% endif %}
+                <div onclick="openProductModal('{{ item.id }}', '{{ item.name }}', {{ item.price }}, '{% if item.image_url %}{{ item.image_url }}{% else %}https://via.placeholder.com/300{% endif %}', '{{ item.category.name }}')" class="min-w-[85vw] md:min-w-[500px] flex-1 h-52 lg:h-64 bg-white rounded-3xl shadow-md flex items-center justify-center text-2xl font-medium relative overflow-hidden group/item cursor-pointer snap-center border-2 border-transparent hover:border-pink-200 transition-all">
+                    {% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.name }}" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/item:scale-105 group-hover/item:opacity-100 transition duration-500">{% endif %}
                     <span class="relative z-10 bg-white/90 px-8 py-3 rounded-[2rem] font-bold text-black shadow-lg group-hover/item:bg-pink-100 group-hover/item:text-pink-600 transition">{{ item.name }}</span>
                 </div>
                 {% empty %}
                 <div class="min-w-[85vw] md:min-w-[500px] h-52 lg:h-64 bg-white rounded-3xl shadow-sm flex items-center justify-center text-2xl font-medium snap-center">รอเพิ่มเมนูในระบบ</div>
                 {% endfor %}
             </div>
-
-            <button onclick="scrollBanner(1)" class="absolute right-4 z-20 bg-white/80 backdrop-blur min-w-[40px] h-10 rounded-full flex items-center justify-center text-xl shadow-lg hover:bg-white transition opacity-70 hover:opacity-100 hidden md:flex">
+            
+            <button onclick="scrollBanner(1)" class="absolute right-2 md:right-6 top-[45%] -translate-y-1/2 z-20 bg-white/80 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg hover:bg-white transition opacity-80 hover:opacity-100">
                 <i class="fa-solid fa-chevron-right"></i>
             </button>
         </div>
     </div>
 
-    <main class="px-6 py-4">
-
+    <main class="px-6 py-4 mb-24">
         {% if request.user.is_authenticated and past_orders %}
         <section class="mb-10">
-            <h2 class="text-2xl font-bold font-serif mb-6 flex items-center">
-                <i class="fa-solid fa-clock-rotate-left text-sky-400 mr-3"></i> ประวัติการซื้อของคุณ
-            </h2>
-            <div class="border-2 border-black rounded-[2rem] p-6 overflow-hidden">
-                <div class="flex gap-6 overflow-x-auto no-scrollbar pb-2 snap-x scroll-smooth">
+            <h2 class="text-2xl font-bold font-serif mb-6 flex items-center"><i class="fa-solid fa-clock-rotate-left text-sky-400 mr-3"></i> ประวัติการซื้อของคุณ</h2>
+            <div class="border-2 border-black rounded-[2rem] p-6 overflow-hidden relative group/hist">
+                <button onclick="scrollCategory(this, -1)" class="absolute left-1 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg hover:bg-pink-50 text-pink-500 transition opacity-80 hover:opacity-100 border border-gray-100">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                
+                <div class="category-row flex gap-6 overflow-x-auto no-scrollbar pb-2 snap-x scroll-smooth">
                     {% for product in past_orders %}
-                    <div onclick="openProductModal('{{ product.id }}', '{{ product.name }}', {{ product.price }}, '{% if product.image_url %}{{ product.image_url }}{% else %}https://via.placeholder.com/300{% endif %}', '{{ product.category.name }}')" 
-                         class="min-w-[200px] max-w-[200px] border border-black rounded-[2rem] overflow-hidden flex flex-col h-56 cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1 snap-start bg-white">
+                    <div onclick="openProductModal('{{ product.id }}', '{{ product.name }}', {{ product.price }}, '{% if product.image_url %}{{ product.image_url }}{% else %}https://via.placeholder.com/300{% endif %}', '{{ product.category.name }}')" class="min-w-[200px] max-w-[200px] border border-black rounded-[2rem] overflow-hidden flex flex-col h-56 cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1 snap-start bg-white">
                         <div class="flex-1 bg-gray-50 flex items-center justify-center font-bold relative overflow-hidden">
-                            {% if product.image_url %}
-                                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
-                            {% else %}
-                                picture
-                            {% endif %}
+                            {% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">{% else %}picture{% endif %}
                         </div>
                         <div class="h-16 border-t border-black bg-white p-3 flex justify-between items-center relative">
                             <span class="font-bold text-sm truncate pr-2 w-1/2">{{ product.name }}</span>
@@ -103,49 +108,63 @@
                     </div>
                     {% endfor %}
                 </div>
+                
+                <button onclick="scrollCategory(this, 1)" class="absolute right-1 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg hover:bg-pink-50 text-pink-500 transition opacity-80 hover:opacity-100 border border-gray-100">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
             </div>
         </section>
         {% endif %}
         
-        <div class="flex items-center gap-4 mb-6">
-            <h2 class="text-2xl font-bold font-serif">หมวดหมู่ :</h2>
-            <div class="flex gap-3 overflow-x-auto no-scrollbar py-1">
-                <a href="?category=All" class="px-6 py-1.5 rounded-full text-black font-bold min-w-max text-center transition 
-                   {% if selected_category == 'All' %} border-2 border-pink-300 bg-white {% else %} bg-[#dff5ff] hover:bg-sky-200 {% endif %}">
-                    All
-                </a>
-                {% for cat in categories %}
-                <a href="?category={{ cat.name }}" class="px-6 py-1.5 rounded-full text-black font-bold min-w-max text-center transition 
-                   {% if selected_category == cat.name %} border-2 border-pink-300 bg-white {% else %} bg-[#dff5ff] hover:bg-sky-200 {% endif %}">
-                    {{ cat.name }}
-                </a>
-                {% endfor %}
+        {% for cat in categories|slice:":4" %}
+        <section class="mb-12">
+            <div class="flex justify-between items-end mb-4 px-2">
+                <h2 class="text-3xl font-bold font-serif">{{ cat.name }}</h2>
+                <button onclick="openSeeAllModal('{{ cat.name }}')" class="flex items-center text-pink-500 hover:text-pink-600 font-bold text-sm bg-pink-50 hover:bg-pink-100 px-5 py-2 rounded-full transition-colors shadow-sm">See all <i class="fa-solid fa-chevron-right text-xs ml-2 mt-[1px]"></i></button>
             </div>
-        </div>
-
-        <div class="border-2 border-black rounded-[2rem] p-6 mb-24">
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                {% for product in products %}
-                <div onclick="openProductModal('{{ product.id }}', '{{ product.name }}', {{ product.price }}, '{% if product.image_url %}{{ product.image_url }}{% else %}https://via.placeholder.com/300{% endif %}', '{{ product.category.name }}')" 
-                     class="border border-black rounded-[2rem] overflow-hidden flex flex-col h-64 cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1">
-                    <div class="flex-1 bg-gray-50 flex items-center justify-center font-bold relative overflow-hidden">
-                        {% if product.image_url %}
-                            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
-                        {% else %}
-                            picture
+            
+            <div class="relative flex items-center group/cat w-full">
+                <button onclick="scrollCategory(this, -1)" class="absolute left-1 z-20 bg-white/90 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg hover:bg-pink-50 text-pink-500 transition opacity-80 hover:opacity-100 border border-gray-100">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                
+                <div class="category-row flex gap-6 overflow-x-auto no-scrollbar pb-4 snap-x scroll-smooth w-full px-2">
+                    {% for product in products %}
+                        {% if product.category.name == cat.name %}
+                        <div onclick="openProductModal('{{ product.id }}', '{{ product.name }}', {{ product.price }}, '{% if product.image_url %}{{ product.image_url }}{% else %}https://via.placeholder.com/300{% endif %}', '{{ product.category.name }}')" class="min-w-[280px] max-w-[280px] border border-black rounded-[2rem] overflow-hidden flex flex-col h-64 cursor-pointer hover:shadow-xl hover:border-purple-400 hover:border-2 transition-all transform hover:-translate-y-1 snap-start bg-white">
+                            <div class="flex-1 bg-gray-50 flex items-center justify-center font-bold relative overflow-hidden">
+                                {% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">{% else %}picture{% endif %}
+                            </div>
+                            <div class="h-20 border-t border-black bg-white p-4 flex flex-col justify-between relative group-hover:border-purple-400 transition-colors">
+                                <span class="font-bold text-base truncate pr-2">{{ product.name }}</span>
+                                <span class="text-right font-bold text-base absolute bottom-3 right-4 text-pink-500">{{ product.price }} บาท</span>
+                            </div>
+                        </div>
                         {% endif %}
-                    </div>
-                    <div class="h-20 border-t border-black bg-white p-3 flex flex-col justify-between relative">
-                        <span class="font-bold text-sm truncate pr-2">{{ product.name }}</span>
-                        <span class="text-right font-bold text-sm absolute bottom-3 right-3 text-pink-500">{{ product.price }} บาท</span>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <div class="col-span-full text-center text-gray-500 py-10 font-bold text-xl">
-                    ไม่มีเมนูในหมวดหมู่นี้
-                </div>
-                {% endfor %}
+                
+                <button onclick="scrollCategory(this, 1)" class="absolute right-1 z-20 bg-white/90 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg hover:bg-pink-50 text-pink-500 transition opacity-80 hover:opacity-100 border border-gray-100">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
             </div>
+        </section>
+        {% empty %}
+        <div class="text-center text-gray-500 py-10 font-bold text-xl">ไม่มีหมวดหมู่ในระบบ</div>
+        {% endfor %}
+
+        <div id="allProductsHidden" class="hidden">
+            {% for product in products %}
+            <div onclick="openProductModal('{{ product.id }}', '{{ product.name }}', {{ product.price }}, '{% if product.image_url %}{{ product.image_url }}{% else %}https://via.placeholder.com/300{% endif %}', '{{ product.category.name }}')" class="product-card border border-black rounded-[2rem] overflow-hidden flex flex-col h-64 cursor-pointer hover:shadow-xl hover:border-purple-400 hover:border-2 transition-all transform hover:-translate-y-1 bg-white" data-category="{{ product.category.name }}">
+                <div class="flex-1 bg-gray-50 flex items-center justify-center font-bold relative overflow-hidden">
+                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">{% else %}picture{% endif %}
+                </div>
+                <div class="h-20 border-t border-black bg-white p-4 flex flex-col justify-between relative transition-colors">
+                    <span class="font-bold text-base truncate pr-2">{{ product.name }}</span>
+                    <span class="text-right font-bold text-base absolute bottom-3 right-4 text-pink-500">{{ product.price }} บาท</span>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </main>
 
@@ -154,54 +173,37 @@
         <span id="cartBadge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-sm font-bold w-7 h-7 rounded-full flex items-center justify-center border-2 border-white">0</span>
     </button>
 
-    <div id="warningModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 backdrop-blur-sm bg-black/40">
-        <div class="bg-white w-full max-w-lg rounded-[3rem] p-8 md:p-10 shadow-2xl relative z-10 border-4 border-yellow-300 text-center">
-            <div class="w-20 h-20 bg-yellow-100 text-yellow-500 rounded-full mx-auto flex items-center justify-center text-4xl mb-6 shadow-inner">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+    <div id="seeAllModal" onclick="if(event.target === this) closeAllPopups()" class="hidden fixed inset-0 z-[80] flex items-center justify-center px-4 py-6 backdrop-blur-sm bg-black/40">
+        <div class="bg-white w-full max-w-6xl rounded-[3rem] p-8 shadow-2xl relative h-[90vh] flex flex-col">
+            <button onclick="closeAllPopups()" class="absolute top-6 right-6 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 z-10 transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="text-center mb-6 border-b-2 border-gray-100 pb-4">
+                <h2 id="seeAllTitle" class="text-4xl font-bold font-serif text-pink-600">ชื่อหมวดหมู่</h2>
+                <p class="text-gray-500 mt-2 font-medium">เมนูทั้งหมดในหมวดหมู่นี้</p>
             </div>
-            <h2 class="text-3xl font-bold font-serif mb-4 text-black">ประกาศแจ้งเตือน</h2>
-            <p class="text-lg text-gray-600 mb-8 leading-relaxed font-medium">
-                เว็บนี้ทำขึ้นเพื่อส่งงานวิชา<br>
-                <span class="font-bold text-sky-500 text-xl">ICT311 การบูรณาการการเขียนโปรแกรมและเทคโนโลยี</span><br><br>
-                <span class="text-red-500 font-bold bg-red-50 px-4 py-2 rounded-full border border-red-100 block">ยังไม่สามารถใช้ได้จริงในตอนนี้</span>
-            </p>
-            <button onclick="closeWarningModal()" class="w-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-4 rounded-[2rem] text-xl transition shadow-lg transform hover:-translate-y-1">
-                รับทราบและเข้าสู่เว็บไซต์
-            </button>
+            <div class="overflow-y-auto no-scrollbar flex-1 px-2">
+                <div id="seeAllGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-8 pt-2"></div>
+            </div>
         </div>
     </div>
 
-    <div id="overlay" onclick="closeAllPopups()" class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"></div>
-
-    <div id="productModal" onclick="if(event.target === this) closeAllPopups()" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+    <div id="productModal" onclick="if(event.target === this) closeProductModal()" class="hidden fixed inset-0 z-[90] flex items-center justify-center px-4 py-6 backdrop-blur-sm bg-black/40">
         <div class="bg-white w-full max-w-md rounded-[3rem] p-6 md:p-8 shadow-2xl relative max-h-[95vh] overflow-y-auto no-scrollbar">
             <button onclick="closeProductModal()" class="absolute top-4 right-4 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl hover:bg-gray-200">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <img id="modalImg" src="" alt="" class="w-full h-40 object-cover rounded-[2rem] mb-4 bg-gray-100">
-            <div class="flex justify-between items-end mb-4">
+            <div class="flex justify-between items-end mb-4 border-b border-gray-100 pb-4">
                 <h2 id="modalName" class="text-2xl font-bold font-serif leading-tight pr-2">ชื่อเมนู</h2>
                 <p id="modalPrice" class="text-xl text-pink-500 font-bold whitespace-nowrap">0 บาท</p>
             </div>
             
-            <div id="drinkOptions" class="hidden mb-6 bg-gray-50 p-4 md:p-5 rounded-2xl border border-gray-200">
-                
+            <div id="drinkOptions" class="hidden mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-200">
                 <h3 class="font-bold text-sm text-gray-700 mb-2">รูปแบบ</h3>
                 <div class="flex gap-2 mb-4" id="drinkTypeContainer">
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="drink_type" value="ร้อน" class="peer sr-only">
-                        <div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-orange-400 peer-checked:bg-orange-50 font-medium text-sm transition">ร้อน</div>
-                    </label>
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="drink_type" value="เย็น" class="peer sr-only" checked>
-                        <div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-sky-400 peer-checked:bg-sky-50 font-medium text-sm transition">เย็น</div>
-                    </label>
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="drink_type" value="ปั่น" class="peer sr-only">
-                        <div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-purple-400 peer-checked:bg-purple-50 font-medium text-sm transition">ปั่น</div>
-                    </label>
+                    <label class="flex-1 cursor-pointer"><input type="radio" name="drink_type" value="ร้อน" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-orange-400 peer-checked:bg-orange-50 transition"><div class="font-medium text-sm">ร้อน</div><div id="lblHotPrice" class="text-xs text-gray-500">0.-</div></div></label>
+                    <label class="flex-1 cursor-pointer"><input type="radio" name="drink_type" value="เย็น" class="peer sr-only" onchange="updateModalPrice()" checked><div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-sky-400 peer-checked:bg-sky-50 transition"><div class="font-medium text-sm">เย็น</div><div id="lblColdPrice" class="text-xs text-gray-500">0.-</div></div></label>
+                    <label class="flex-1 cursor-pointer"><input type="radio" name="drink_type" value="ปั่น" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-purple-400 peer-checked:bg-purple-50 transition"><div class="font-medium text-sm">ปั่น</div><div id="lblFrappePrice" class="text-xs text-gray-500">0.-</div></div></label>
                 </div>
-                
                 <h3 class="font-bold text-sm text-gray-700 mb-2">ระดับความหวาน</h3>
                 <div class="flex gap-1 text-xs mb-4">
                     <label class="flex-1 cursor-pointer"><input type="radio" name="sweetness" value="0" class="peer sr-only"><div class="text-center py-2 px-1 border-2 border-gray-200 rounded-xl peer-checked:border-pink-400 peer-checked:bg-pink-50 font-bold transition">0%</div></label>
@@ -210,27 +212,35 @@
                     <label class="flex-1 cursor-pointer"><input type="radio" name="sweetness" value="75" class="peer sr-only"><div class="text-center py-2 px-1 border-2 border-gray-200 rounded-xl peer-checked:border-pink-400 peer-checked:bg-pink-50 font-bold transition">75%</div></label>
                     <label class="flex-1 cursor-pointer"><input type="radio" name="sweetness" value="100" class="peer sr-only" checked><div class="text-center py-2 px-1 border-2 border-gray-200 rounded-xl peer-checked:border-pink-400 peer-checked:bg-pink-50 font-bold transition">100%</div></label>
                 </div>
-
                 <h3 class="font-bold text-sm text-gray-700 mb-2">ขนาดแก้ว</h3>
                 <div class="flex gap-2">
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="drink_size" value="ปกติ" class="peer sr-only" onchange="updateModalPrice()" checked>
-                        <div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-green-400 peer-checked:bg-green-50 transition">
-                            <div class="font-medium text-sm">ปกติ</div><div class="text-xs text-gray-500">+0.-</div>
-                        </div>
-                    </label>
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="drink_size" value="ใหญ่" class="peer sr-only" onchange="updateModalPrice()">
-                        <div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-green-400 peer-checked:bg-green-50 transition">
-                            <div class="font-medium text-sm">ใหญ่</div><div class="text-xs text-gray-500">+5.-</div>
-                        </div>
-                    </label>
-                    <label class="flex-1 cursor-pointer">
-                        <input type="radio" name="drink_size" value="ใหญ่พิเศษ" class="peer sr-only" onchange="updateModalPrice()">
-                        <div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-green-400 peer-checked:bg-green-50 transition">
-                            <div class="font-medium text-sm">ใหญ่พิเศษ</div><div class="text-xs text-gray-500">+10.-</div>
-                        </div>
-                    </label>
+                    <label class="flex-1 cursor-pointer"><input type="radio" name="drink_size" value="ปกติ" class="peer sr-only" onchange="updateModalPrice()" checked><div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-green-400 peer-checked:bg-green-50 transition"><div class="font-medium text-sm">ปกติ</div><div class="text-xs text-gray-500">+0.-</div></div></label>
+                    <label class="flex-1 cursor-pointer"><input type="radio" name="drink_size" value="ใหญ่" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-green-400 peer-checked:bg-green-50 transition"><div class="font-medium text-sm">ใหญ่</div><div class="text-xs text-gray-500">+5.-</div></div></label>
+                    <label class="flex-1 cursor-pointer"><input type="radio" name="drink_size" value="ใหญ่พิเศษ" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-gray-200 rounded-xl peer-checked:border-green-400 peer-checked:bg-green-50 transition"><div class="font-medium text-sm">ใหญ่พิเศษ</div><div class="text-xs text-gray-500">+10.-</div></div></label>
+                </div>
+            </div>
+
+            <div id="bobaOptions" class="hidden mb-6 bg-pink-50 p-4 rounded-2xl border border-pink-200">
+                <h3 class="font-bold text-sm text-pink-700 mb-2">ท็อปปิ้ง (+10 บาท)</h3>
+                <div class="flex gap-2">
+                    <label class="flex-1 cursor-pointer"><input type="radio" name="add_boba" value="ไม่ใส่" class="peer sr-only" onchange="updateModalPrice()" checked><div class="text-center py-2 border-2 border-pink-200 rounded-xl peer-checked:border-pink-500 peer-checked:bg-pink-100 font-bold text-sm transition text-pink-600">ไม่ใส่ไข่มุก</div></label>
+                    <label class="flex-1 cursor-pointer"><input type="radio" name="add_boba" value="ใส่ไข่มุก" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-pink-200 rounded-xl peer-checked:border-pink-500 peer-checked:bg-pink-100 font-bold text-sm transition text-pink-600">เพิ่มไข่มุก (+10)</div></label>
+                </div>
+            </div>
+
+            <div id="flavorOptions" class="hidden mb-6 bg-blue-50 p-4 rounded-2xl border border-blue-200">
+                <h3 class="font-bold text-sm text-blue-700 mb-2">เลือกรสชาติที่ต้องการ</h3>
+                <div class="grid grid-cols-2 gap-2" id="flavorContainer"></div>
+            </div>
+
+            <div id="meatOptions" class="hidden mb-6 bg-orange-50 p-4 rounded-2xl border border-orange-200">
+                <h3 class="font-bold text-sm text-orange-700 mb-2">เลือกเนื้อสัตว์</h3>
+                <div class="grid grid-cols-2 gap-2" id="meatContainer">
+                    <label class="cursor-pointer"><input type="radio" name="meat_type" value="ไก่" class="peer sr-only" onchange="updateModalPrice()" checked><div class="text-center py-2 border-2 border-orange-200 rounded-xl peer-checked:border-orange-500 peer-checked:bg-orange-100 font-bold text-sm transition text-orange-700">ไก่</div></label>
+                    <label class="cursor-pointer"><input type="radio" name="meat_type" value="หมู" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-orange-200 rounded-xl peer-checked:border-orange-500 peer-checked:bg-orange-100 font-bold text-sm transition text-orange-700">หมู</div></label>
+                    <label class="cursor-pointer"><input type="radio" name="meat_type" value="เนื้อ" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-orange-200 rounded-xl peer-checked:border-orange-500 peer-checked:bg-orange-100 font-bold text-sm transition text-orange-700">เนื้อ (+5)</div></label>
+                    <label class="cursor-pointer"><input type="radio" name="meat_type" value="กุ้ง" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-orange-200 rounded-xl peer-checked:border-orange-500 peer-checked:bg-orange-100 font-bold text-sm transition text-orange-700">กุ้ง (+10)</div></label>
+                    <label class="cursor-pointer col-span-2"><input type="radio" name="meat_type" value="ทะเลรวมมิตร" class="peer sr-only" onchange="updateModalPrice()"><div class="text-center py-2 border-2 border-orange-200 rounded-xl peer-checked:border-orange-500 peer-checked:bg-orange-100 font-bold text-sm transition text-orange-700">ทะเลรวมมิตร (+10)</div></label>
                 </div>
             </div>
             
@@ -239,22 +249,36 @@
                 <span id="modalQty" class="text-2xl font-bold w-12 text-center">1</span>
                 <button onclick="updateQty(1)" class="w-12 h-12 bg-black text-white rounded-full shadow flex items-center justify-center text-xl font-bold hover:bg-gray-800">+</button>
             </div>
-            
-            <button onclick="addToCart()" class="w-full bg-[#bde0fe] hover:bg-sky-300 text-black font-bold py-4 rounded-[2rem] text-xl transition shadow-md">
-                ใส่ตะกร้า
-            </button>
+            <button onclick="addToCart()" class="w-full bg-[#bde0fe] hover:bg-sky-300 text-black font-bold py-4 rounded-[2rem] text-xl transition shadow-md">ใส่ตะกร้า</button>
         </div>
     </div>
 
+    <div id="warningModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 backdrop-blur-sm bg-black/40">
+        <div class="bg-white w-full max-w-lg rounded-[3rem] p-8 md:p-10 shadow-2xl relative z-10 border-4 border-yellow-300 text-center">
+            <div class="w-20 h-20 bg-yellow-100 text-yellow-500 rounded-full mx-auto flex items-center justify-center text-4xl mb-6 shadow-inner"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h2 class="text-3xl font-bold font-serif mb-4 text-black">ประกาศแจ้งเตือน</h2>
+            <p class="text-lg text-gray-600 mb-8 leading-relaxed font-medium">เว็บนี้ทำขึ้นเพื่อส่งงานวิชา<br><span class="font-bold text-sky-500 text-xl">ICT311 การบูรณาการการเขียนโปรแกรมและเทคโนโลยี</span><br><br><span class="text-red-500 font-bold bg-red-50 px-4 py-2 rounded-full border border-red-100 block">ยังไม่สามารถใช้ได้จริงในตอนนี้</span></p>
+            <button onclick="closeWarningModal()" class="w-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-4 rounded-[2rem] text-xl transition shadow-lg transform hover:-translate-y-1">รับทราบและเข้าสู่เว็บไซต์</button>
+        </div>
+    </div>
+
+    <div id="queueModal" onclick="if(event.target === this) closeAllPopups()" class="hidden fixed inset-0 z-[95] flex items-center justify-center px-4 backdrop-blur-sm bg-black/40">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl relative z-10 text-center">
+            <button onclick="closeAllPopups()" class="absolute top-4 right-4 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-20 h-20 bg-sky-100 text-sky-500 rounded-full mx-auto flex items-center justify-center text-4xl mb-4 shadow-sm"><i class="fa-solid fa-bell-concierge"></i></div>
+            <h2 class="text-2xl font-bold font-serif mb-2 text-black">สถานะออเดอร์ของคุณ</h2>
+            <div id="queueContent" class="mt-4 mb-6"><p class="text-gray-500">กำลังโหลดข้อมูล...</p></div>
+            <button onclick="closeAllPopups()" class="w-full bg-[#bde0fe] hover:bg-sky-300 text-black font-bold py-4 rounded-[2rem] text-xl transition shadow-md">ตกลง / ปิดหน้าต่าง</button>
+        </div>
+    </div>
+
+    <div id="overlay" onclick="closeAllPopups()" class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"></div>
+
     <div id="cartPopup" class="fixed top-0 right-0 w-[400px] max-w-[90%] h-full bg-white z-50 transform translate-x-full transition-transform duration-300 rounded-l-[3rem] shadow-2xl flex flex-col border border-gray-200">
-        <button onclick="closeAllPopups()" class="absolute top-6 right-6 w-10 h-10 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 transition">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+        <button onclick="closeAllPopups()" class="absolute top-6 right-6 w-10 h-10 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
         <div class="p-8 flex-1 flex flex-col h-full mt-4">
             <h2 class="text-3xl font-bold font-serif mb-6">ตะกร้า</h2>
-            <div id="cartItemsContainer" class="flex-1 overflow-y-auto font-medium pr-2">
-                <div class="text-center text-gray-400 mt-10">ยังไม่มีสินค้าในตะกร้า</div>
-            </div>
+            <div id="cartItemsContainer" class="flex-1 overflow-y-auto font-medium pr-2"></div>
             <div class="mt-4 pt-4 border-t-2 border-gray-100 bg-white">
                 <div class="flex justify-between text-xl font-bold mb-6 px-2"><span>รวม :</span><span id="cartTotal" class="text-pink-500">0 บาท</span></div>
                 <a href="{% url 'checkout' %}" id="checkoutBtn" class="block w-full text-center bg-[#bde0fe] hover:bg-sky-300 text-black font-bold py-4 rounded-3xl text-lg transition pointer-events-none opacity-50">จ่ายเงิน</a>
@@ -264,29 +288,18 @@
 
     <div id="profilePopup" class="fixed top-0 right-0 w-[320px] max-w-[85%] h-full bg-white z-50 transform translate-x-full transition-transform duration-300 rounded-l-[3rem] shadow-2xl flex flex-col p-6 border border-gray-200">
         <button onclick="closeAllPopups()" class="absolute top-6 right-6 w-10 h-10 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-xl hover:bg-gray-200 transition"><i class="fa-solid fa-xmark"></i></button>
-        
         <div class="mt-16 flex flex-col flex-1">
             {% if request.user.is_authenticated %}
                 <div class="flex flex-col items-center">
-                    {% if request.user.profile.profile_pic %}
-                        <img src="{{ request.user.profile.profile_pic.url }}" class="w-28 h-28 rounded-full mb-4 object-cover shadow-md border-4 border-white">
-                    {% else %}
-                        <div class="w-28 h-28 bg-black rounded-full mb-4 flex items-center justify-center text-white text-5xl overflow-hidden shadow-md"><i class="fa-solid fa-user"></i></div>
-                    {% endif %}
+                    {% if request.user.profile.profile_pic %}<img src="{{ request.user.profile.profile_pic.url }}" class="w-28 h-28 rounded-full mb-4 object-cover shadow-md border-4 border-white">{% else %}<div class="w-28 h-28 bg-black rounded-full mb-4 flex items-center justify-center text-white text-5xl overflow-hidden shadow-md"><i class="fa-solid fa-user"></i></div>{% endif %}
                     <h2 class="text-2xl font-bold font-serif mb-1">{{ request.user.username }}</h2>
                     <p class="text-sm text-gray-500 mb-2">{{ request.user.email }}</p>
-                    <div class="bg-pink-100 text-pink-600 px-4 py-1 rounded-full text-sm font-bold mb-6 shadow-sm border border-pink-200">
-                        <i class="fa-solid fa-star text-yellow-500"></i> {{ request.user.profile.points }} แต้ม
-                    </div>
+                    <div class="bg-pink-100 text-pink-600 px-4 py-1 rounded-full text-sm font-bold mb-6 shadow-sm border border-pink-200"><i class="fa-solid fa-star text-yellow-500"></i> {{ request.user.profile.points }} แต้ม</div>
                 </div>
                 <div class="w-full mt-auto pb-2">
-                    {% if request.user.is_staff %}
-                    <a href="{% url 'staff_dashboard' %}" class="block w-full text-center bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold py-3 rounded-[2rem] transition mb-3"><i class="fa-solid fa-clipboard-list mr-2"></i> จัดการร้าน (พนักงาน)</a>
-                    {% endif %}
+                    {% if request.user.is_staff %}<a href="{% url 'staff_dashboard' %}" class="block w-full text-center bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold py-3 rounded-[2rem] transition mb-3"><i class="fa-solid fa-clipboard-list mr-2"></i> จัดการร้าน</a>{% endif %}
                     <a href="{% url 'edit_profile' %}" class="block w-full text-center bg-gray-100 hover:bg-gray-200 text-black font-bold py-3 rounded-[2rem] transition mb-3"><i class="fa-solid fa-pen-to-square mr-2"></i> แก้ไขข้อมูล</a>
-                    <form action="{% url 'logout' %}" method="POST" class="w-full">
-                        {% csrf_token %}<button type="submit" class="w-full text-center border-2 border-red-100 text-red-500 hover:bg-red-50 font-bold py-3 rounded-[2rem] transition">ออกจากระบบ</button>
-                    </form>
+                    <form action="{% url 'logout' %}" method="POST" class="w-full">{% csrf_token %}<button type="submit" class="w-full text-center border-2 border-red-100 text-red-500 hover:bg-red-50 font-bold py-3 rounded-[2rem] transition">ออกจากระบบ</button></form>
                 </div>
             {% else %}
                 <div class="flex flex-col items-center">
@@ -300,33 +313,23 @@
                 </div>
             {% endif %}
         </div>
-
-        <div class="w-full flex justify-end mt-2 pt-2 border-t border-transparent">
-            <button onclick="openModal('teamModal')" class="text-gray-300 hover:text-pink-400 transition hover:opacity-100 text-sm" title="รายชื่อผู้จัดทำ">
-                <i class="fa-solid fa-users"></i>
-            </button>
-        </div>
+        <div class="w-full flex justify-end mt-2 pt-2 border-t border-transparent"><button onclick="openModal('teamModal')" class="text-gray-300 hover:text-pink-400 transition hover:opacity-100 text-sm" title="รายชื่อผู้จัดทำ"><i class="fa-solid fa-users"></i></button></div>
     </div>
 
-    <div id="teamModal" onclick="if(event.target === this) closeAllPopups()" class="hidden fixed inset-0 z-[70] flex items-center justify-center px-4">
+    <div id="teamModal" onclick="if(event.target === this) closeAllPopups()" class="hidden fixed inset-0 z-[70] flex items-center justify-center px-4 backdrop-blur-sm bg-black/40">
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl relative z-10 border border-gray-100 text-center">
             <div class="w-16 h-16 bg-pink-100 text-pink-500 rounded-full mx-auto flex items-center justify-center text-2xl mb-4 shadow-sm">
                 <i class="fa-solid fa-users"></i>
             </div>
             <h2 class="text-2xl font-bold font-serif mb-6 text-pink-600">รายชื่อผู้จัดทำ</h2>
-            <div class="space-y-4 text-lg font-bold">
-                <div class="bg-gray-50 py-3 px-4 rounded-2xl border border-gray-100 shadow-sm">
-                    <p class="text-sky-500 text-sm mb-1">รหัสนักศึกษา</p>
+            <div class="bg-gray-50 py-6 px-4 rounded-3xl border border-gray-100 shadow-sm">
+                <p class="text-sky-500 text-sm font-bold mb-3">รหัสนักศึกษา</p>
+                <div class="space-y-3 text-lg font-bold text-gray-800">
                     <p>66063987 ภัทรภณ รุนบาง</p>
-                </div>
-                <div class="bg-gray-50 py-3 px-4 rounded-2xl border border-gray-100 shadow-sm">
-                    <p class="text-sky-500 text-sm mb-1">รหัสนักศึกษา</p>
                     <p>66063994 ภูริจักษ์ สุขมอญ</p>
                 </div>
             </div>
-            <button onclick="closeAllPopups()" class="w-full bg-pink-300 hover:bg-pink-400 text-white font-bold py-4 rounded-[2rem] text-xl transition mt-8 shadow-md">
-                ปิดหน้าต่าง
-            </button>
+            <button onclick="closeAllPopups()" class="w-full bg-pink-300 hover:bg-pink-400 text-white font-bold py-4 rounded-[2rem] text-xl transition mt-8 shadow-md">ปิดหน้าต่าง</button>
         </div>
     </div>
 
@@ -337,12 +340,7 @@
             <form action="{% url 'login' %}" method="POST">
                 {% csrf_token %}
                 <div class="mb-4"><input type="text" name="username" placeholder="Username" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-sky-300" required></div>
-                <div class="mb-4 relative">
-                    <input type="password" id="loginPassword" name="password" placeholder="Password" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 pr-14 text-lg focus:outline-none focus:border-sky-300" required>
-                    <button type="button" onclick="togglePassword('loginPassword', this)" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-sky-500 transition text-xl">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+                <div class="mb-4 relative"><input type="password" id="loginPassword" name="password" placeholder="Password" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 pr-14 text-lg focus:outline-none focus:border-sky-300" required><button type="button" onclick="togglePassword('loginPassword', this)" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-sky-500 transition text-xl"><i class="fa-solid fa-eye"></i></button></div>
                 {% for message in messages %}{% if 'login' in message.tags %}<p class="text-red-500 text-sm font-bold text-center mb-4"><i class="fa-solid fa-circle-exclamation"></i> {{ message }}</p>{% endif %}{% endfor %}
                 <button type="submit" class="w-full bg-[#bde0fe] hover:bg-sky-300 text-black font-bold py-4 rounded-[2rem] text-xl transition mt-2">เข้าสู่ระบบ</button>
             </form>
@@ -356,12 +354,7 @@
             <form action="{% url 'register' %}" method="POST">
                 {% csrf_token %}
                 <div class="mb-4"><input type="text" name="username" placeholder="Username" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-pink-300" required></div>
-                <div class="mb-4 relative">
-                    <input type="password" id="registerPassword" name="password" placeholder="Password" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 pr-14 text-lg focus:outline-none focus:border-pink-300" required>
-                    <button type="button" onclick="togglePassword('registerPassword', this)" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-pink-500 transition text-xl">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
+                <div class="mb-4 relative"><input type="password" id="registerPassword" name="password" placeholder="Password" class="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl px-6 py-4 pr-14 text-lg focus:outline-none focus:border-pink-300" required><button type="button" onclick="togglePassword('registerPassword', this)" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-pink-500 transition text-xl"><i class="fa-solid fa-eye"></i></button></div>
                 {% for message in messages %}{% if 'register' in message.tags %}<p class="text-red-500 text-sm font-bold text-center mb-4"><i class="fa-solid fa-circle-exclamation"></i> {{ message }}</p>{% endif %}{% endfor %}
                 <button type="submit" class="w-full bg-[#ffd1dc] hover:bg-pink-300 text-black font-bold py-4 rounded-[2rem] text-xl transition mt-2">สร้างบัญชี</button>
             </form>
@@ -369,7 +362,6 @@
     </div>
 
     <script>
-        // ฟังก์ชันปิดกล่องแจ้งเตือนและบันทึกค่าลง LocalStorage
         function closeWarningModal() {
             document.getElementById('warningModal').classList.add('hidden');
             localStorage.setItem('ict311_warning_seen', 'true');
@@ -378,106 +370,201 @@
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
             const icon = btn.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+            if (input.type === 'password') { input.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } 
+            else { input.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+        }
+
+        function scrollCategory(btn, direction) {
+            const container = btn.parentElement.querySelector('.category-row');
+            if(container && container.children.length > 0) {
+                const itemWidth = container.children[0].offsetWidth + 24; 
+                container.scrollBy({left: direction * itemWidth * 2, behavior: 'smooth'}); 
             }
         }
 
+        function openSeeAllModal(categoryName) {
+            document.getElementById('seeAllTitle').innerText = categoryName;
+            const grid = document.getElementById('seeAllGrid');
+            grid.innerHTML = ''; 
+            const cards = document.querySelectorAll(`#allProductsHidden .product-card[data-category="${categoryName}"]`);
+            if(cards.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10 font-bold text-xl">ไม่มีเมนูในหมวดหมู่นี้</div>';
+            } else {
+                cards.forEach(card => grid.appendChild(card.cloneNode(true)));
+            }
+            openModal('seeAllModal');
+        }
+
         let cart = JSON.parse(localStorage.getItem('cafe888_cart')) || [];
-        let currentItem = { id: '', name: '', price: 0, basePrice: 0, img: '', qty: 1, isDrink: false, drink_type: '', sweetness: '', size: '' };
+        
+        let currentItem = { id: '', name: '', price: 0, basePrice: 0, img: '', qty: 1, isDrink: false, drink_type: '', sweetness: '', size: '', boba: '', flavor: '', meat: '' };
 
         function openProductModal(id, name, price, img, categoryName) {
-            currentItem = { id, name, price, basePrice: price, img, qty: 1, isDrink: false, drink_type: '', sweetness: '', size: 'ปกติ' };
+            currentItem = { id, name, price, basePrice: price, img, qty: 1, isDrink: false, drink_type: '', sweetness: '', size: '', boba: 'ไม่ใส่', flavor: '', meat: '' };
             document.getElementById('modalImg').src = img;
             document.getElementById('modalName').innerText = name;
             document.getElementById('modalQty').innerText = currentItem.qty;
             
+            document.getElementById('drinkOptions').classList.add('hidden');
+            document.getElementById('bobaOptions').classList.add('hidden');
+            document.getElementById('flavorOptions').classList.add('hidden');
+            document.getElementById('meatOptions').classList.add('hidden');
+
+            const defaultMeat = document.querySelector('input[name="meat_type"][value="ไก่"]');
+            if(defaultMeat) defaultMeat.checked = true;
+
             if(categoryName === 'Drinks' || categoryName === 'เครื่องดื่ม') {
                 currentItem.isDrink = true;
                 document.getElementById('drinkOptions').classList.remove('hidden');
+                
+                document.getElementById('lblHotPrice').innerText = (price - 10) + '.-';
+                document.getElementById('lblColdPrice').innerText = (price - 5) + '.-';
+                document.getElementById('lblFrappePrice').innerText = price + '.-';
+
                 document.querySelectorAll('input[name="drink_type"]').forEach(r => r.closest('label').classList.remove('hidden'));
                 document.querySelector('input[name="drink_size"][value="ปกติ"]').checked = true;
                 document.querySelector('input[name="sweetness"][value="100"]').checked = true;
 
-                if (name.includes('สมูทตี้')) {
+                if (name.includes('ชานมไต้หวัน')) {
+                    document.querySelector('input[name="drink_type"][value="เย็น"]').checked = true;
+                    document.querySelectorAll('input[name="drink_type"]').forEach(r => { if(r.value !== 'เย็น') r.closest('label').classList.add('hidden'); });
+                    
+                    document.getElementById('bobaOptions').classList.remove('hidden');
+                    document.querySelector('input[name="add_boba"][value="ไม่ใส่"]').checked = true;
+                } 
+                else if (name.includes('ชามะนาว') || name.includes('ชาพีช') || name.includes('ชาเขียวมะนาว') || name.includes('น้ำผึ้งมะนาวโซดา')) {
+                    document.querySelector('input[name="drink_type"][value="เย็น"]').checked = true;
+                    document.querySelectorAll('input[name="drink_type"]').forEach(r => { if(r.value !== 'เย็น') r.closest('label').classList.add('hidden'); });
+                }
+                else if (name.includes('อิตาเลียนโซดา')) {
+                    document.querySelector('input[name="drink_type"][value="เย็น"]').checked = true;
+                    document.querySelectorAll('input[name="drink_type"]').forEach(r => { if(r.value !== 'เย็น') r.closest('label').classList.add('hidden'); });
+                    
+                    document.getElementById('flavorOptions').classList.remove('hidden');
+                    document.getElementById('flavorContainer').innerHTML = `
+                        <label class="cursor-pointer"><input type="radio" name="flavor_type" value="สตรอว์เบอร์รี" class="peer sr-only" checked><div class="text-center py-3 border-2 border-blue-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-100 font-bold text-sm transition text-blue-700">สตรอว์เบอร์รี 🍓</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="flavor_type" value="บลูฮาวาย" class="peer sr-only"><div class="text-center py-3 border-2 border-blue-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-100 font-bold text-sm transition text-blue-700">บลูฮาวาย 🌊</div></label>
+                        <label class="cursor-pointer col-span-2"><input type="radio" name="flavor_type" value="แอปเปิ้ลเขียว" class="peer sr-only"><div class="text-center py-3 border-2 border-blue-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-100 font-bold text-sm transition text-blue-700">แอปเปิ้ลเขียว 🍏</div></label>
+                    `;
+                }
+                else if (name.includes('สมูทตี้')) {
                     document.querySelector('input[name="drink_type"][value="ปั่น"]').checked = true;
-                    document.querySelectorAll('input[name="drink_type"]').forEach(r => {
-                        if(r.value !== 'ปั่น') r.closest('label').classList.add('hidden');
-                    });
+                    document.querySelectorAll('input[name="drink_type"]').forEach(r => { if(r.value !== 'ปั่น') r.closest('label').classList.add('hidden'); });
                 } else if (name.includes('ชาผลไม้')) {
                     document.querySelector('input[name="drink_type"][value="เย็น"]').checked = true;
-                    document.querySelectorAll('input[name="drink_type"]').forEach(r => {
-                        if(r.value !== 'เย็น') r.closest('label').classList.add('hidden');
-                    });
+                    document.querySelectorAll('input[name="drink_type"]').forEach(r => { if(r.value !== 'เย็น') r.closest('label').classList.add('hidden'); });
+                } else if (name.includes('เอสเพรสโซ') || name.includes('อเมริกาโน')) {
+                    document.querySelector('input[name="drink_type"][value="เย็น"]').checked = true;
+                    document.querySelectorAll('input[name="drink_type"]').forEach(r => { if(r.value === 'ปั่น') r.closest('label').classList.add('hidden'); });
                 } else {
                     document.querySelector('input[name="drink_type"][value="เย็น"]').checked = true;
                 }
             } else {
                 currentItem.isDrink = false;
-                document.getElementById('drinkOptions').classList.add('hidden');
+
+                if (name.includes('ข้าวกะเพรา') || name.includes('ข้าวผัด')) {
+                    document.getElementById('meatOptions').classList.remove('hidden');
+                }
+                else if (name.includes('เครป')) {
+                    document.getElementById('flavorOptions').classList.remove('hidden');
+                    document.getElementById('flavorContainer').innerHTML = `
+                        <label class="cursor-pointer"><input type="radio" name="flavor_type" value="สตรอว์เบอร์รี" class="peer sr-only" checked><div class="text-center py-3 border-2 border-blue-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-100 font-bold text-sm transition text-blue-700">สตรอว์เบอร์รี</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="flavor_type" value="บลูเบอร์รี" class="peer sr-only"><div class="text-center py-3 border-2 border-blue-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-100 font-bold text-sm transition text-blue-700">บลูเบอร์รี</div></label>
+                        <label class="cursor-pointer col-span-2"><input type="radio" name="flavor_type" value="นูเทลล่า" class="peer sr-only"><div class="text-center py-3 border-2 border-blue-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-100 font-bold text-sm transition text-blue-700">นูเทลล่า</div></label>
+                    `;
+                }
             }
             updateModalPrice();
-            document.getElementById('overlay').classList.remove('hidden');
+            
             document.getElementById('productModal').classList.remove('hidden');
+            document.getElementById('overlay').classList.remove('hidden');
         }
 
         function updateModalPrice() {
             let finalPrice = parseFloat(currentItem.basePrice);
+            
             if (currentItem.isDrink) {
-                const size = document.querySelector('input[name="drink_size"]:checked').value;
-                if (size === 'ใหญ่') finalPrice += 5;
-                else if (size === 'ใหญ่พิเศษ') finalPrice += 10;
+                const drinkType = document.querySelector('input[name="drink_type"]:checked');
+                if (drinkType) {
+                    if (drinkType.value === 'ร้อน') finalPrice -= 10;
+                    else if (drinkType.value === 'เย็น') finalPrice -= 5;
+                }
+
+                const size = document.querySelector('input[name="drink_size"]:checked');
+                if (size) {
+                    if (size.value === 'ใหญ่') finalPrice += 5; 
+                    else if (size.value === 'ใหญ่พิเศษ') finalPrice += 10;
+                }
+
+                if (!document.getElementById('bobaOptions').classList.contains('hidden')) {
+                    const boba = document.querySelector('input[name="add_boba"]:checked');
+                    if (boba && boba.value === 'ใส่ไข่มุก') finalPrice += 10;
+                }
             }
+            
+            if (!document.getElementById('meatOptions').classList.contains('hidden')) {
+                const meat = document.querySelector('input[name="meat_type"]:checked');
+                if (meat) {
+                    if (meat.value === 'เนื้อ') finalPrice += 5;
+                    else if (meat.value === 'กุ้ง' || meat.value === 'ทะเลรวมมิตร') finalPrice += 10;
+                }
+            }
+            
             currentItem.price = finalPrice;
             document.getElementById('modalPrice').innerText = finalPrice + " บาท";
         }
 
-        function closeProductModal() {
-            document.getElementById('productModal').classList.add('hidden');
-            checkOverlay();
+        function closeProductModal() { 
+            document.getElementById('productModal').classList.add('hidden'); 
+            checkOverlay(); 
         }
-
-        function updateQty(change) {
-            if (currentItem.qty + change > 0) {
-                currentItem.qty += change;
-                document.getElementById('modalQty').innerText = currentItem.qty;
-            }
-        }
+        
+        function updateQty(change) { if (currentItem.qty + change > 0) { currentItem.qty += change; document.getElementById('modalQty').innerText = currentItem.qty; } }
 
         function addToCart() {
             if (currentItem.isDrink) {
                 currentItem.drink_type = document.querySelector('input[name="drink_type"]:checked').value;
                 currentItem.sweetness = document.querySelector('input[name="sweetness"]:checked').value;
                 currentItem.size = document.querySelector('input[name="drink_size"]:checked').value;
+            } else {
+                currentItem.drink_type = '';
+                currentItem.sweetness = '';
+                currentItem.size = '';
+                currentItem.boba = '';
             }
+
+            if (!document.getElementById('bobaOptions').classList.contains('hidden')) {
+                currentItem.boba = document.querySelector('input[name="add_boba"]:checked').value;
+            }
+            if (!document.getElementById('flavorOptions').classList.contains('hidden')) {
+                currentItem.flavor = document.querySelector('input[name="flavor_type"]:checked').value;
+            }
+            if (!document.getElementById('meatOptions').classList.contains('hidden')) {
+                currentItem.meat = document.querySelector('input[name="meat_type"]:checked').value;
+            }
+
             const existingItem = cart.find(item => 
                 item.id === currentItem.id && 
                 item.drink_type === currentItem.drink_type && 
-                item.sweetness === currentItem.sweetness &&
-                item.size === currentItem.size
+                item.sweetness === currentItem.sweetness && 
+                item.size === currentItem.size &&
+                item.boba === currentItem.boba &&
+                item.flavor === currentItem.flavor &&
+                item.meat === currentItem.meat
             );
-            if (existingItem) {
-                existingItem.qty += currentItem.qty;
-            } else {
-                cart.push({...currentItem}); 
-            }
+            
+            if (existingItem) { existingItem.qty += currentItem.qty; } 
+            else { cart.push({...currentItem}); }
+            
             saveAndRenderCart();
-            closeProductModal();
+            closeAllPopups(); 
             openPopup('cartPopup'); 
         }
 
         function changeCartItemQty(index, change) {
             if(cart[index]) {
                 cart[index].qty += change;
-                if(cart[index].qty <= 0) {
-                    cart.splice(index, 1);
-                }
+                if(cart[index].qty <= 0) cart.splice(index, 1);
                 saveAndRenderCart();
             }
         }
@@ -488,41 +575,45 @@
             const badge = document.getElementById('cartBadge');
             const totalEl = document.getElementById('cartTotal');
             const checkoutBtn = document.getElementById('checkoutBtn');
-            let total = 0;
-            let totalQty = 0;
+            let total = 0; let totalQty = 0;
             container.innerHTML = '';
+            
             if (cart.length === 0) {
                 container.innerHTML = '<div class="text-center text-gray-400 mt-10">ยังไม่มีสินค้าในตะกร้า</div>';
-                badge.classList.add('hidden');
-                checkoutBtn.classList.add('pointer-events-none', 'opacity-50');
+                badge.classList.add('hidden'); checkoutBtn.classList.add('pointer-events-none', 'opacity-50');
             } else {
-                badge.classList.remove('hidden');
-                checkoutBtn.classList.remove('pointer-events-none', 'opacity-50');
+                badge.classList.remove('hidden'); checkoutBtn.classList.remove('pointer-events-none', 'opacity-50');
                 cart.forEach((item, index) => {
-                    total += item.price * item.qty;
-                    totalQty += item.qty;
+                    total += item.price * item.qty; totalQty += item.qty;
+                    
                     let optionText = '';
-                    if(item.isDrink) {
-                        optionText = `<div class="text-xs text-gray-500 mt-1">(${item.drink_type}, หวาน ${item.sweetness}%, ${item.size})</div>`;
+                    let details = [];
+                    if (item.isDrink) details.push(`${item.drink_type}, หวาน ${item.sweetness}%, ${item.size}`);
+                    if (item.boba && item.boba !== 'ไม่ใส่') details.push('+ไข่มุก');
+                    if (item.flavor) details.push(`รส${item.flavor}`);
+                    if (item.meat) details.push(`เนื้อ${item.meat}`);
+
+                    if(details.length > 0) {
+                        optionText = `<div class="text-xs text-sky-600 font-bold mt-1 bg-sky-50 px-2 py-1 rounded-md inline-block">(${details.join(' / ')})</div>`;
                     }
+
                     container.innerHTML += `
-                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl mb-3 border border-gray-100">
-                            <div class="w-1/2 pr-2">
-                                <div class="font-bold truncate">${item.name}</div>
+                        <div class="flex justify-between items-center bg-white p-3 rounded-xl mb-3 border border-gray-200 shadow-sm">
+                            <div class="w-[55%] pr-2">
+                                <div class="font-bold truncate text-gray-800">${item.name}</div>
                                 ${optionText}
                             </div>
-                            <div class="w-1/4 flex items-center justify-center gap-2">
-                                <button onclick="changeCartItemQty(${index}, -1)" class="w-6 h-6 bg-white rounded-full shadow font-bold text-sm">-</button>
+                            <div class="w-[25%] flex items-center justify-center gap-2">
+                                <button onclick="changeCartItemQty(${index}, -1)" class="w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full shadow-sm font-bold text-sm transition">-</button>
                                 <span>${item.qty}</span>
-                                <button onclick="changeCartItemQty(${index}, 1)" class="w-6 h-6 bg-black text-white rounded-full shadow font-bold text-sm">+</button>
+                                <button onclick="changeCartItemQty(${index}, 1)" class="w-6 h-6 bg-black text-white rounded-full shadow-sm font-bold text-sm hover:bg-gray-800 transition">+</button>
                             </div>
-                            <span class="w-1/4 text-right font-bold">${item.price * item.qty}.-</span>
+                            <span class="w-[20%] text-right font-bold text-pink-500">${item.price * item.qty}.-</span>
                         </div>
                     `;
                 });
             }
-            badge.innerText = totalQty;
-            totalEl.innerText = total + " บาท";
+            badge.innerText = totalQty; totalEl.innerText = total + " บาท";
         }
 
         function openModal(modalId) { closeAllPopups(); document.getElementById('overlay').classList.remove('hidden'); document.getElementById(modalId).classList.remove('hidden'); }
@@ -536,28 +627,72 @@
             document.getElementById('loginModal').classList.add('hidden'); 
             document.getElementById('registerModal').classList.add('hidden'); 
             document.getElementById('teamModal').classList.add('hidden'); 
+            document.getElementById('seeAllModal').classList.add('hidden'); 
+            document.getElementById('queueModal').classList.add('hidden'); 
         }
 
-        function checkOverlay() { if (document.getElementById('cartPopup').classList.contains('translate-x-full') && document.getElementById('profilePopup').classList.contains('translate-x-full') && document.getElementById('loginModal').classList.contains('hidden') && document.getElementById('registerModal').classList.contains('hidden') && document.getElementById('teamModal').classList.contains('hidden')) { document.getElementById('overlay').classList.add('hidden'); } }
+        function checkOverlay() { 
+            if (document.getElementById('cartPopup').classList.contains('translate-x-full') && 
+                document.getElementById('profilePopup').classList.contains('translate-x-full') && 
+                document.getElementById('loginModal').classList.contains('hidden') && 
+                document.getElementById('registerModal').classList.contains('hidden') && 
+                document.getElementById('teamModal').classList.contains('hidden') &&
+                document.getElementById('seeAllModal').classList.contains('hidden') &&
+                document.getElementById('queueModal').classList.contains('hidden')) { 
+                document.getElementById('overlay').classList.add('hidden'); 
+            } 
+        }
 
         function checkQueueStatus() {
             fetch("{% url 'api_check_queue' %}")
                 .then(res => res.json())
                 .then(data => {
                     const bellWrapper = document.getElementById('bellWrapper');
+                    const queueContent = document.getElementById('queueContent');
+                    if(!bellWrapper || !queueContent) return;
+
                     if(data.status === 'none') {
-                        bellWrapper.innerHTML = `<button class="opacity-30 cursor-not-allowed transition relative mt-1 text-gray-400 block" disabled title="ยังไม่มีคิวในขณะนี้"><i class="fa-solid fa-bell"></i></button>`;
+                        bellWrapper.innerHTML = `<button onclick="openModal('queueModal')" class="opacity-30 transition relative mt-1 text-gray-400 block"><i class="fa-solid fa-bell"></i></button>`;
+                        queueContent.innerHTML = `<p class="text-gray-500 font-medium py-4">คุณยังไม่มีคิวในขณะนี้ ไปสั่งอาหารกันเถอะ!</p>`;
                     } else {
                         let dotHtml = '';
-                        if(data.status === 'ready') dotHtml = `<span class="absolute -top-1 -right-1 flex h-4 w-4"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white"></span></span>`;
-                        bellWrapper.innerHTML = `<a href="{% url 'queue' %}" class="hover:opacity-70 transition relative mt-1 text-black block"><i class="fa-solid fa-bell"></i>${dotHtml}</a>`;
+                        let statusText = '';
+                        let statusColor = '';
+
+                        if(data.status === 'ready') {
+                            dotHtml = `<span class="absolute -top-1 -right-1 flex h-4 w-4"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white"></span></span>`;
+                            statusText = 'อาหารเสร็จแล้ว! มารับได้เลย 🎉';
+                            statusColor = 'text-green-500 bg-green-50 border-green-200';
+                            
+                            if(!sessionStorage.getItem('queue_alerted_ready')) {
+                                openModal('queueModal');
+                                sessionStorage.setItem('queue_alerted_ready', 'true');
+                            }
+                        } else if (data.status === 'cooking') {
+                            statusText = 'พนักงานกำลังเตรียมอาหาร 🍳';
+                            statusColor = 'text-orange-500 bg-orange-50 border-orange-200';
+                            sessionStorage.removeItem('queue_alerted_ready');
+                        } else {
+                            statusText = 'รอคิว / รอรับออเดอร์ ⏳';
+                            statusColor = 'text-gray-600 bg-gray-50 border-gray-200';
+                            sessionStorage.removeItem('queue_alerted_ready');
+                        }
+
+                        bellWrapper.innerHTML = `<button onclick="openModal('queueModal')" class="hover:opacity-70 transition relative mt-1 text-black block"><i class="fa-solid fa-bell"></i>${dotHtml}</button>`;
+                        
+                        queueContent.innerHTML = `
+                            <div class="mb-4">
+                                <span class="text-gray-500 text-sm">หมายเลขคิวของคุณ</span>
+                                <h3 class="text-5xl font-black text-sky-500 mt-1">${data.queue_number}</h3>
+                            </div>
+                            <div class="text-lg font-bold ${statusColor} py-4 px-2 rounded-2xl border shadow-sm">${statusText}</div>
+                        `;
                     }
                 })
                 .catch(err => console.log(err));
         }
 
-        let autoScrollInterval;
-        let autoScrollTimeout;
+        let autoScrollInterval, autoScrollTimeout;
 
         function startAutoScroll() {
             clearInterval(autoScrollInterval);
@@ -574,11 +709,7 @@
             }, 3000); 
         }
 
-        function resetAutoScroll() {
-            clearInterval(autoScrollInterval);
-            clearTimeout(autoScrollTimeout);
-            autoScrollTimeout = setTimeout(startAutoScroll, 5000); 
-        }
+        function resetAutoScroll() { clearInterval(autoScrollInterval); clearTimeout(autoScrollTimeout); autoScrollTimeout = setTimeout(startAutoScroll, 5000); }
 
         function scrollBanner(direction) {
             const banner = document.getElementById('bannerScroll');
@@ -591,11 +722,27 @@
 
         window.onload = function() {
             saveAndRenderCart();
-            {% if messages %}{% for message in messages %}{% if 'login' in message.tags %}openModal('loginModal');{% elif 'register' in message.tags %}openModal('registerModal');{% endif %}{% endfor %}{% endif %}
+            
+            {% if messages %}
+                {% for message in messages %}
+                    {% if 'login' in message.tags %}
+                        openModal('loginModal');
+                    {% elif 'register' in message.tags %}
+                        openModal('registerModal');
+                    {% elif 'order_placed' in message.tags %}
+                        cart = [];
+                        localStorage.removeItem('cafe888_cart');
+                        saveAndRenderCart();
+                        openModal('queueModal');
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            
             setInterval(checkQueueStatus, 5000);
+            checkQueueStatus();
+
             startAutoScroll(); 
 
-            // ระบบเช็คเงื่อนไขโชว์ Modal แจ้งเตือนการทำโปรเจกต์
             if (!localStorage.getItem('ict311_warning_seen')) {
                 document.getElementById('warningModal').classList.remove('hidden');
             }

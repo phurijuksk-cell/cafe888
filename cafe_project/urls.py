@@ -11,6 +11,6 @@ urlpatterns = [
     path('', include('pages.urls')),
 ]
 
-# เพิ่มบรรทัดนี้ เพื่อบอกให้ระบบอนุญาตให้เบราว์เซอร์เข้าถึงโฟลเดอร์รูปภาพได้
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

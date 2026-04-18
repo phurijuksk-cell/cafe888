@@ -66,8 +66,12 @@ class OrderItem(models.Model):
     
     sweetness = models.CharField(max_length=20, blank=True, null=True)
     drink_type = models.CharField(max_length=20, blank=True, null=True)
-    # เพิ่มใหม่: เก็บขนาดแก้ว (ปกติ, ใหญ่, ใหญ่พิเศษ)
     size = models.CharField(max_length=20, blank=True, null=True)
+    
+
+    boba = models.CharField(max_length=50, blank=True, null=True)
+    flavor = models.CharField(max_length=50, blank=True, null=True)
+    meat = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return f"{self.qty}x {self.product_name} (คิว {self.queue.queue_number})"

@@ -1,13 +1,28 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cafe888 - เพิ่มพนักงานใหม่</title>
+    <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}?v=2">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        
+        .bg-wavy-gradient {
+            background: linear-gradient(-45deg, #dff5ff, #f0e6ff, #ffb6c1, #f0e6ff);
+            background-size: 400% 400%;
+            animation: gradientWave 8s ease infinite;
+        }
+        @keyframes gradientWave {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-r from-[#dff5ff] via-[#f0e6ff] to-[#ffb6c1] min-h-screen font-sans text-gray-800 flex flex-col items-center justify-center p-6">
+<body class="bg-wavy-gradient min-h-screen font-sans text-gray-800 flex flex-col items-center justify-center p-6">
 
     <div class="w-full max-w-md bg-white rounded-[3rem] p-8 md:p-10 shadow-2xl relative border-2 border-white">
         
@@ -62,11 +77,11 @@
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash'); // เปลี่ยนเป็นรูปตาขีดฆ่า
+                icon.classList.add('fa-eye-slash'); 
             } else {
                 input.type = 'password';
                 icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye'); // เปลี่ยนกลับเป็นรูปตาปกติ
+                icon.classList.add('fa-eye'); 
             }
         }
     </script>

@@ -14,29 +14,20 @@ def index(request):
         products = Product.objects.all()
     else:
         products = Product.objects.filter(category__name=selected_category)
-        
-    # ========================================================
-    # [อัปเดต] ระบบแบนเนอร์: สุ่มแค่ครั้งแรก แล้วจำไว้ใน Session
-    # ========================================================
+
     if 'banner_product_ids' in request.session:
-        # ถ้าเคยสุ่มไว้แล้ว ให้ดึง ID จาก Session มาใช้
         banner_ids = request.session['banner_product_ids']
         products_qs = Product.objects.filter(id__in=banner_ids)
         product_dict = {p.id: p for p in products_qs}
-        # ดึงสินค้าออกมาและเรียงลำดับให้เป๊ะตามที่เคยสุ่มไว้
         banner_products = [product_dict[i] for i in banner_ids if i in product_dict]
     else:
-        # ถ้าเข้ามาครั้งแรกสุด ให้ทำการสุ่มใหม่
         banner_products = []
         for cat in categories:
             cat_products = list(Product.objects.filter(category=cat).order_by('?')[:3])
             banner_products.extend(cat_products)
         random.shuffle(banner_products) 
-        
-        # เก็บ ID ของสินค้าที่สุ่มได้ ลงไปใน Session
         request.session['banner_product_ids'] = [p.id for p in banner_products]
-    # ========================================================
-    
+   
     has_active_queue = False
     queue_status = '' 
     past_orders = [] 
@@ -72,10 +63,10 @@ def index(request):
 def checkout(request): 
     if request.user.is_authenticated:
         if OrderQueue.objects.filter(user=request.user).exclude(status='completed').exists():
-            return redirect('queue')
+            return redirect('index')
     elif 'active_queue_id' in request.session:
         if OrderQueue.objects.filter(id=request.session['active_queue_id']).exclude(status='completed').exists():
-            return redirect('queue')
+            return redirect('index')
             
     return render(request, 'pages/checkout.html')
 
@@ -83,14 +74,23 @@ def queue(request):
     if request.method == 'POST':
         if request.user.is_authenticated:
             if OrderQueue.objects.filter(user=request.user).exclude(status='completed').exists():
-                return redirect('queue')
+                return redirect('index')
         elif 'active_queue_id' in request.session:
             if OrderQueue.objects.filter(id=request.session['active_queue_id']).exclude(status='completed').exists():
-                return redirect('queue')
+                return redirect('index')
 
         dining_option = request.POST.get('dining_option')
         table_number = request.POST.get('table_number', '')
-        queue_number = f"{random.randint(1, 999):03d}"
+        
+        last_queue = OrderQueue.objects.exclude(status='completed').order_by('-created_at').first()
+        if last_queue and last_queue.queue_number.isdigit():
+            next_num = int(last_queue.queue_number) + 1
+            if next_num > 999:
+                next_num = 1
+        else:
+            next_num = 1
+            
+        queue_number = f"{next_num:03d}"
         
         payment_method = request.POST.get('payment_method', 'cash')
         payment_status = 'paid' if payment_method == 'promptpay' else 'pending'
@@ -131,7 +131,10 @@ def queue(request):
                     qty=item.get('qty', 1),
                     sweetness=item.get('sweetness', ''), 
                     drink_type=item.get('drink_type', ''),
-                    size=item.get('size', '') 
+                    size=item.get('size', ''),
+                    boba=item.get('boba', ''),
+                    flavor=item.get('flavor', ''),
+                    meat=item.get('meat', '')
                 )
         except json.JSONDecodeError:
             pass 
@@ -142,16 +145,8 @@ def queue(request):
         else:
             request.session['active_queue_id'] = new_queue.id
             
-        return redirect('queue') 
-    
-    active_queue = None
-    if request.user.is_authenticated:
-        active_queue = OrderQueue.objects.filter(user=request.user).exclude(status='completed').first()
-    elif 'active_queue_id' in request.session:
-        active_queue = OrderQueue.objects.filter(id=request.session['active_queue_id']).exclude(status='completed').first()
-
-    if active_queue:
-        return render(request, 'pages/queue.html', {'queue': active_queue})
+        messages.success(request, 'order_placed', extra_tags='order_placed')
+        return redirect('index') 
     
     return redirect('index')
 
@@ -261,19 +256,20 @@ def delete_account(request):
 
 def api_check_queue(request):
     status = 'none'
+    queue_number = ''
     if request.user.is_authenticated:
         active_q = OrderQueue.objects.filter(user=request.user).exclude(status='completed').first()
         if active_q:
             status = active_q.status
+            queue_number = active_q.queue_number
     elif 'active_queue_id' in request.session:
         active_q = OrderQueue.objects.filter(id=request.session['active_queue_id']).exclude(status='completed').first()
         if active_q:
             status = active_q.status
-    return JsonResponse({'status': status})
-
+            queue_number = active_q.queue_number
+    return JsonResponse({'status': status, 'queue_number': queue_number})
 
 def add_staff(request):
-    # ดักไว้ก่อน: ถ้าไม่ได้ล็อกอิน หรือไม่ใช่ Admin (Superuser) ให้เตะออก
     if not request.user.is_authenticated or not request.user.is_superuser:
         messages.error(request, 'เฉพาะเจ้าของร้าน (Admin) เท่านั้นที่สามารถเพิ่มพนักงานได้', extra_tags='login')
         return redirect('index')
@@ -287,12 +283,10 @@ def add_staff(request):
         elif len(p) < 6:
             messages.error(request, 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', extra_tags='add_staff_error')
         else:
-            # สร้างบัญชีใหม่ และตั้งค่าให้เป็น "พนักงาน" (แต่ไม่ใช่ Admin)
             new_staff = User.objects.create_user(username=u, password=p)
             new_staff.is_staff = True 
             new_staff.save()
             
-            # สร้าง Profile ผูกไว้ด้วยเผื่อใช้งาน
             UserProfile.objects.create(user=new_staff)
             
             messages.success(request, f'เพิ่มบัญชีพนักงาน "{u}" เรียบร้อยแล้ว!', extra_tags='add_staff_success')

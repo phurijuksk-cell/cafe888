@@ -19,7 +19,7 @@ urlpatterns = [
     path('update-queue/<int:queue_id>/<str:new_status>/', views.update_queue_status, name='update_queue_status'),
     path('update-payment/<int:queue_id>/<str:new_status>/', views.update_payment_status, name='update_payment_status'),
 
-    # [เพิ่มใหม่] หน้าจอสำหรับให้ Admin เพิ่มพนักงาน
+
     path('add-staff/', views.add_staff, name='add_staff'),
 
     path('api/check-queue/', views.api_check_queue, name='api_check_queue'),
